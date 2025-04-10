@@ -63,9 +63,16 @@ class MenuHiding {
      * @since 1.0.0
      */
     public function register_settings() {
-        // First, make sure the option exists to avoid initialization issues
+        // First, make sure the options exist to avoid initialization issues
         if ( false === get_option( 'fhc_hidden_menu_items' ) ) {
             add_option( 'fhc_hidden_menu_items', array() );
+        }
+        
+        if ( false === get_option( 'fhc_menu_hiding_settings' ) ) {
+            add_option( 'fhc_menu_hiding_settings', array(
+                'use_whitelist' => false,
+                'whitelisted_emails' => ''
+            ) );
         }
         
         register_setting(
@@ -74,6 +81,18 @@ class MenuHiding {
             array(
                 'sanitize_callback' => array( $this, 'sanitize_hidden_menu_items' ),
                 'default'           => array(),
+            )
+        );
+        
+        register_setting(
+            'fhc_settings',
+            'fhc_menu_hiding_settings',
+            array(
+                'sanitize_callback' => array( $this, 'sanitize_menu_hiding_settings' ),
+                'default'           => array(
+                    'use_whitelist' => false,
+                    'whitelisted_emails' => ''
+                ),
             )
         );
     }
@@ -99,6 +118,39 @@ class MenuHiding {
                 // We're using base64 encoded keys, so we don't need to sanitize them
                 $sanitized_input[ $key ] = 1;
             }
+        }
+        
+        return $sanitized_input;
+    }
+    
+    /**
+     * Sanitize menu hiding settings.
+     *
+     * @since 1.1.4
+     * @param array|string $input The value being saved.
+     * @return array Sanitized value.
+     */
+    public function sanitize_menu_hiding_settings( $input ) {
+        $sanitized_input = array();
+        
+        // Sanitize use_whitelist (boolean)
+        $sanitized_input['use_whitelist'] = isset( $input['use_whitelist'] ) && $input['use_whitelist'] ? true : false;
+        
+        // Sanitize whitelisted emails (comma-separated list)
+        if ( isset( $input['whitelisted_emails'] ) ) {
+            $emails = explode( ',', $input['whitelisted_emails'] );
+            $sanitized_emails = array();
+            
+            foreach ( $emails as $email ) {
+                $email = trim( $email );
+                if ( ! empty( $email ) && is_email( $email ) ) {
+                    $sanitized_emails[] = sanitize_email( $email );
+                }
+            }
+            
+            $sanitized_input['whitelisted_emails'] = implode( ', ', $sanitized_emails );
+        } else {
+            $sanitized_input['whitelisted_emails'] = '';
         }
         
         return $sanitized_input;
@@ -211,13 +263,51 @@ class MenuHiding {
     }
 
     /**
+     * Check if current user should be able to see hidden menu items.
+     * 
+     * @since 1.1.4
+     * @return bool True if user should see all items, false otherwise.
+     */
+    private function user_can_see_all_items() {
+        // Super admins always see everything
+        if ( is_super_admin() ) {
+            return true;
+        }
+        
+        // Regular admin without whitelisting enabled see everything
+        $menu_hiding_settings = get_option( 'fhc_menu_hiding_settings', array() );
+        $use_whitelist = isset( $menu_hiding_settings['use_whitelist'] ) ? $menu_hiding_settings['use_whitelist'] : false;
+        
+        if ( !$use_whitelist && current_user_can( 'administrator' ) ) {
+            return true;
+        }
+        
+        // Check if user's email is in the whitelist
+        if ( $use_whitelist ) {
+            $current_user = wp_get_current_user();
+            $user_email = $current_user->user_email;
+            
+            $whitelisted_emails = isset( $menu_hiding_settings['whitelisted_emails'] ) ? 
+                $menu_hiding_settings['whitelisted_emails'] : '';
+                
+            $emails_array = array_map( 'trim', explode( ',', $whitelisted_emails ) );
+            
+            if ( in_array( $user_email, $emails_array ) ) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
      * Block access to hidden pages for non-admin users.
      * 
      * @since 1.0.0
      */
     public function block_hidden_page_access() {
-        // Only apply for non-admin users.
-        if ( current_user_can( 'administrator' ) ) {
+        // Skip if user can see all items
+        if ( $this->user_can_see_all_items() ) {
             return;
         }
 
@@ -305,8 +395,8 @@ class MenuHiding {
      * @since 1.0.0
      */
     public function hide_menu_items() {
-        // Only apply for non-admin users.
-        if ( current_user_can( 'administrator' ) ) {
+        // Skip if user can see all items
+        if ( $this->user_can_see_all_items() ) {
             return;
         }
 
@@ -362,6 +452,10 @@ class MenuHiding {
     public function render_tab_content() {
         // Get saved settings.
         $hidden_menu_items = get_option( 'fhc_hidden_menu_items', array() );
+        $menu_hiding_settings = get_option( 'fhc_menu_hiding_settings', array(
+            'use_whitelist' => false,
+            'whitelisted_emails' => ''
+        ) );
         
         // Get all menu items.
         $menu_items = $this->get_admin_menu_items();
@@ -379,6 +473,58 @@ class MenuHiding {
             
             <div class="fhc-section-info">
                 <p><?php esc_html_e( 'Selecting menu items below will both hide them from the dashboard navigation AND prevent non-admin users from accessing these pages directly via URL.', 'focal-haus-core' ); ?></p>
+            </div>
+            
+            <div class="fhc-section fhc-admin-whitelist-section">
+                <h3><?php esc_html_e( 'Admin Whitelist Settings', 'focal-haus-core' ); ?></h3>
+                <p class="description">
+                    <?php esc_html_e( 'By default, admin users can see all menu items. Enable this option to restrict certain admin users.', 'focal-haus-core' ); ?>
+                </p>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_use_whitelist">
+                                <?php esc_html_e( 'Use Admin Whitelist', 'focal-haus-core' ); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <input 
+                                type="checkbox" 
+                                id="fhc_use_whitelist" 
+                                name="fhc_menu_hiding_settings[use_whitelist]" 
+                                value="1" 
+                                <?php checked( isset( $menu_hiding_settings['use_whitelist'] ) && $menu_hiding_settings['use_whitelist'] ); ?>
+                            >
+                            <span class="description">
+                                <?php esc_html_e( 'When enabled, only admin users with emails in the whitelist below will be exempt from menu hiding.', 'focal-haus-core' ); ?>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_whitelisted_emails">
+                                <?php esc_html_e( 'Whitelisted Admin Emails', 'focal-haus-core' ); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <textarea 
+                                id="fhc_whitelisted_emails"
+                                name="fhc_menu_hiding_settings[whitelisted_emails]"
+                                class="large-text code"
+                                rows="4"
+                                placeholder="admin@example.com, manager@example.com"
+                            ><?php echo esc_textarea( isset( $menu_hiding_settings['whitelisted_emails'] ) ? $menu_hiding_settings['whitelisted_emails'] : '' ); ?></textarea>
+                            <p class="description">
+                                <?php esc_html_e( 'Enter comma-separated email addresses of admin users who should see all menu items.', 'focal-haus-core' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="fhc-section">
+                <h3><?php esc_html_e( 'Menu Items to Hide', 'focal-haus-core' ); ?></h3>
             </div>
             
             <div class="fhc-grid-container">

@@ -3,7 +3,7 @@ Contributors: focalhausdev
 Tags: admin, dashboard, menu, hide, security, roles, core, multilingual
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,8 +49,8 @@ The plugin includes several utility features:
 * Menu items organized in columns for better usability
 * Visual feedback with highlighted selected items
 * Hide both top-level menu items and their submenu items
-* Only administrators can see and modify the settings
-* Menu items are hidden only for non-admin users
+* Admin whitelist feature allowing only specific admin users to see all menu items
+* Options to hide menu items from both non-admin users and non-whitelisted admin users
 * Removes update count strings from menu names (e.g., "Updates 0", "Comments 00")
 
 = Security =
@@ -76,7 +76,7 @@ Currently, the multilingual features are designed to work with Polylang. Support
 
 = Will the Hide Menu Items feature hide menu items for administrators? =
 
-No, administrators will always see all menu items. This feature only affects non-admin users.
+By default, administrators will see all menu items. However, with the new admin whitelist feature, you can choose to hide menu items from all admin users except those whose email addresses you've added to the whitelist.
 
 = Will removing CPT base slugs cause conflicts with other plugins? =
 
@@ -96,6 +96,13 @@ This feature only hides menu items from the dashboard menu. It does not restrict
 2. The Hide Menu Items tab where administrators can select which menu items to hide.
 
 == Changelog ==
+
+= 1.1.4 =
+* Added Admin Whitelist feature to the Hide Menu Items functionality
+* Now you can selectively show menu items to specific admin users by email address
+* Added toggle to enable/disable the admin whitelist feature
+* Improved UI with a dedicated section for whitelist configuration
+* Updated security to properly sanitize and validate email addresses
 
 = 1.1.3 =
 * Added new "Misc." tab for miscellaneous features

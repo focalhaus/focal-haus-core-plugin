@@ -33,8 +33,8 @@ The Focal Haus Core Plugin is a powerful toolkit that provides multiple essentia
 * Menu items organized in columns for better usability
 * Visual feedback with highlighted selected items
 * Hide both top-level menu items and their submenu items
-* Only administrators can see and modify the settings
-* Menu items are hidden only for non-admin users
+* Admin whitelist feature allowing only specific admin users to see all menu items
+* Options to hide menu items from both non-admin users and non-whitelisted admin users
 * Removes update count strings from menu names (e.g., "Updates 0", "Comments 00")
 
 ### Misc. Utilities
@@ -67,7 +67,7 @@ Currently, the multilingual features are designed to work with Polylang. Support
 
 ### Will the Hide Menu Items feature hide menu items for administrators?
 
-No, administrators will always see all menu items. This feature only affects non-admin users.
+By default, administrators will see all menu items. However, with the new admin whitelist feature, you can choose to hide menu items from all admin users except those whose email addresses you've added to the whitelist.
 
 ### Will removing CPT base slugs cause conflicts with other plugins?
 

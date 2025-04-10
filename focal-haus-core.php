@@ -3,7 +3,7 @@
  * Plugin Name: Focal Haus Core Plugin
  * Plugin URI: https://www.focalhaus.com/plugins/focal-haus-core
  * Description: A comprehensive plugin that provides multiple functionalities for WordPress sites, including hiding dashboard menu items, custom permalinks, plugin integrations, and multilingual support.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: Focal Haus Dev Team
  * Author URI: https://www.focalhaus.com
  * License: GPL-2.0+
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'FHC_VERSION', '1.1.3' );
+define( 'FHC_VERSION', '1.1.4' );
 define( 'FHC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FHC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FHC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -77,6 +77,7 @@ register_deactivation_hook( __FILE__, 'fhc_deactivate' );
 function fhc_uninstall() {
     // Clean up plugin options.
     delete_option( 'fhc_hidden_menu_items' );
+    delete_option( 'fhc_menu_hiding_settings' );
     delete_option( 'fhc_cpt_without_base' );
     delete_option( 'fhc_misc_settings' );
     

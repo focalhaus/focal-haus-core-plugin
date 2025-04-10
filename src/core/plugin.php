@@ -12,6 +12,7 @@ use FocalHaus\admin\Settings;
 use FocalHaus\MenuHiding\MenuHiding;
 use FocalHaus\Permalinks\Permalinks;
 use FocalHaus\misc\Misc;
+use FocalHaus\GTM\GTM;
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -93,5 +94,8 @@ class Plugin {
         
         // Initialize misc module
         Misc::get_instance();
+        
+        // Initialize Google Tag Manager module
+        GTM::get_instance();
     }
 }

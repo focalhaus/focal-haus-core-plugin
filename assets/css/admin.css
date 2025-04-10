@@ -228,3 +228,47 @@
     max-height: 300px;
     border: 1px solid #e5e5e5;
 }
+
+/* Google Tag Manager */
+.fhc-code-preview {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.fhc-code-preview h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.fhc-code-preview h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.fhc-code-container {
+    margin-bottom: 25px;
+}
+
+.fhc-code-container:last-child {
+    margin-bottom: 0;
+}
+
+.fhc-code-container pre {
+    background-color: #fff;
+    padding: 15px;
+    overflow: auto;
+    max-height: 300px;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #333;
+    white-space: pre;
+}

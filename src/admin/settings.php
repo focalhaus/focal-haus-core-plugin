@@ -98,6 +98,10 @@ class Settings {
                 'title' => __( 'Misc.', 'focal-haus-core' ),
                 'callback' => array( $this, 'render_misc_settings_tab' ),
             ),
+            'gtm_settings' => array(
+                'title' => __( 'Google Tag Manager', 'focal-haus-core' ),
+                'callback' => array( $this, 'render_gtm_settings_tab' ),
+            ),
             // Additional tabs can be added here
         );
 
@@ -328,5 +332,16 @@ class Settings {
         // Get the misc module instance and render its tab content
         $misc = \FocalHaus\Misc\Misc::get_instance();
         $misc->render_tab_content();
+    }
+    
+    /**
+     * Render the Google Tag Manager Settings tab content.
+     *
+     * @since 1.1.5
+     */
+    public function render_gtm_settings_tab() {
+        // Get the GTM module instance and render its tab content
+        $gtm = \FocalHaus\GTM\GTM::get_instance();
+        $gtm->render_tab_content();
     }
 }

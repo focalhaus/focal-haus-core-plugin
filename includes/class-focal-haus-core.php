@@ -83,9 +83,6 @@ class Focal_Haus_Core {
         
         // Initialize permalinks module
         FHC_Permalinks::get_instance();
-        
-        // Initialize integrations module
-        new Focal_Haus_Core_Integrations();
     }
     
     /**
@@ -100,6 +97,5 @@ class Focal_Haus_Core {
         // Modules
         require_once FHC_PLUGIN_DIR . 'includes/modules/class-menu-hiding.php';
         require_once FHC_PLUGIN_DIR . 'includes/modules/class-permalinks.php';
-        require_once FHC_PLUGIN_DIR . 'includes/modules/class-integrations.php';
     }
 }

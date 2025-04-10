@@ -46,7 +46,6 @@ class Autoloader {
         
         // Handle special cases for directory names
         $file_path = str_replace('MenuHiding', 'menu-hiding', $file_path);
-        $file_path = str_replace('Integrations', 'integrations', $file_path);
         $file_path = str_replace('Misc', 'misc', $file_path);
         
         $file_path = FHC_PLUGIN_DIR . 'src' . DIRECTORY_SEPARATOR . $file_path . '.php';

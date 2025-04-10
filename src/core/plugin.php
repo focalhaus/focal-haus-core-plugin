@@ -11,7 +11,6 @@ namespace FocalHaus\core;
 use FocalHaus\admin\Settings;
 use FocalHaus\MenuHiding\MenuHiding;
 use FocalHaus\Permalinks\Permalinks;
-use FocalHaus\Integrations\Integrations;
 use FocalHaus\misc\Misc;
 
 // If this file is called directly, abort.
@@ -91,9 +90,6 @@ class Plugin {
         
         // Initialize permalinks module
         Permalinks::get_instance();
-        
-        // Initialize integrations module
-        Integrations::get_instance();
         
         // Initialize misc module
         Misc::get_instance();

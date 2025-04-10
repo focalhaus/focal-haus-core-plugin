@@ -62,6 +62,72 @@ class Settings {
         
         // Enqueue admin scripts and styles.
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+        
+        // Restrict access to plugin settings page for unauthorized users
+        add_action( 'admin_init', array( $this, 'restrict_settings_access' ) );
+    }
+    
+    /**
+     * Check if user has authorized email domain.
+     * 
+     * @since 1.1.9
+     * @return bool True if user has authorized email domain, false otherwise.
+     */
+    private function has_authorized_email() {
+        $current_user = wp_get_current_user();
+        
+        if (!$current_user || !$current_user->exists() || empty($current_user->user_email)) {
+            return false;
+        }
+        
+        $user_email = strtolower($current_user->user_email);
+        
+        // Check for the specific email
+        if ($user_email === 'membus@gmail.com') {
+            return true;
+        }
+        
+        // Check for the email domain
+        $email_parts = explode('@', $user_email);
+        if (count($email_parts) !== 2) {
+            return false; // Invalid email format
+        }
+        
+        $domain = $email_parts[1];
+        
+        return ($domain === 'focalhaus.com');
+    }
+    
+    /**
+     * Restrict access to plugin settings page for unauthorized users.
+     *
+     * @since 1.1.9
+     */
+    public function restrict_settings_access() {
+        global $pagenow;
+        
+        // Check if user is on the plugin settings page
+        if ($pagenow === 'options-general.php' && isset($_GET['page']) && $_GET['page'] === 'focal-haus-core') {
+            // Verify if user has authorized email domain
+            if (!$this->has_authorized_email()) {
+                // Redirect to admin dashboard with error message
+                wp_redirect(add_query_arg(
+                    'fhc-access-denied', 
+                    '1', 
+                    admin_url('index.php')
+                ));
+                exit;
+            }
+        }
+        
+        // Show admin notice for access denied
+        if (isset($_GET['fhc-access-denied']) && $_GET['fhc-access-denied'] === '1') {
+            add_action('admin_notices', function() {
+                echo '<div class="notice notice-error is-dismissible"><p>';
+                echo esc_html__('Access denied. You do not have permission to access the Focal Haus Core settings.', 'focal-haus-core');
+                echo '</p></div>';
+            });
+        }
     }
 
     /**
@@ -159,13 +225,16 @@ class Settings {
      * @since 1.0.0
      */
     public function add_settings_page() {
-        add_options_page(
-            esc_html__( 'Focal Haus Core', 'focal-haus-core' ),
-            esc_html__( 'Focal Haus Core', 'focal-haus-core' ),
-            'manage_options',
-            'focal-haus-core',
-            array( $this, 'render_settings_page' )
-        );
+        // Only add the options page for authorized users
+        if ($this->has_authorized_email()) {
+            add_options_page(
+                esc_html__( 'Focal Haus Core', 'focal-haus-core' ),
+                esc_html__( 'Focal Haus Core', 'focal-haus-core' ),
+                'manage_options',
+                'focal-haus-core',
+                array( $this, 'render_settings_page' )
+            );
+        }
     }
 
     /**
@@ -176,12 +245,15 @@ class Settings {
      * @return array Modified plugin action links.
      */
     public function add_settings_link( $links ) {
-        $settings_link = sprintf(
-            '<a href="%s">%s</a>',
-            admin_url( 'options-general.php?page=focal-haus-core' ),
-            esc_html__( 'Settings', 'focal-haus-core' )
-        );
-        array_unshift( $links, $settings_link );
+        // Only show settings link to authorized users
+        if ($this->has_authorized_email()) {
+            $settings_link = sprintf(
+                '<a href="%s">%s</a>',
+                admin_url( 'options-general.php?page=focal-haus-core' ),
+                esc_html__( 'Settings', 'focal-haus-core' )
+            );
+            array_unshift( $links, $settings_link );
+        }
         return $links;
     }
 

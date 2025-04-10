@@ -14,22 +14,9 @@
              * Initialize the admin functionality
              */
             init: function() {
-                this.addControlButtons();
                 this.setupEventListeners();
                 this.setupFormSubmission();
                 this.initializeCheckedStates();
-            },
-
-            /**
-             * Add control buttons for checking/unchecking all items
-             */
-            addControlButtons: function() {
-                const $controlsDiv = $('<div class="fhc-controls"></div>');
-                const $checkAllBtn = $('<button type="button" class="button fhc-check-all">' + fhcL10n.checkAll + '</button>');
-                const $uncheckAllBtn = $('<button type="button" class="button fhc-uncheck-all">' + fhcL10n.uncheckAll + '</button>');
-                
-                $controlsDiv.append($checkAllBtn).append(' ').append($uncheckAllBtn);
-                $('.fhc-grid-container').prepend($controlsDiv);
             },
 
             /**
@@ -75,18 +62,9 @@
                     }
                 });
                 
-                // Check all button click event
-                $('.fhc-check-all').on('click', function(e) {
-                    e.preventDefault();
-                    $('.fhc-menu-item input[type="checkbox"], .fhc-submenu-item input[type="checkbox"]').prop('checked', true);
-                    $('.fhc-menu-group').addClass('fhc-checked fhc-has-checked-submenu');
-                });
-                
-                // Uncheck all button click event
-                $('.fhc-uncheck-all').on('click', function(e) {
-                    e.preventDefault();
-                    $('.fhc-menu-item input[type="checkbox"], .fhc-submenu-item input[type="checkbox"]').prop('checked', false);
-                    $('.fhc-menu-group').removeClass('fhc-checked fhc-has-checked-submenu');
+                // Tab navigation
+                $('.nav-tab').on('click', function() {
+                    // This is handled by WordPress, but we could add custom behavior here if needed
                 });
                 
                 // Tab navigation

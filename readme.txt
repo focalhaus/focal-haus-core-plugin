@@ -1,13 +1,13 @@
 === Focal Haus Core Plugin ===
 Contributors: focalhausdev
-Tags: admin, dashboard, menu, hide, security, roles, core
+Tags: admin, dashboard, menu, hide, security, roles, core, multilingual
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A comprehensive plugin that provides multiple functionalities for WordPress sites.
+A comprehensive plugin that provides multiple functionalities for WordPress sites, including multilingual support.
 
 == Description ==
 
@@ -18,6 +18,7 @@ The Focal Haus Core Plugin is a powerful toolkit that provides multiple essentia
 * **Hide Dashboard Menu Items**: Allows administrators to choose which dashboard menu items will be hidden for non-admin users. This is particularly useful for client sites where you want to simplify the WordPress admin interface for your clients or restrict access to certain areas of the dashboard.
 * **Custom Permalinks**: Remove base slugs from Custom Post Types (CPTs) to create cleaner, more user-friendly URLs.
 * **Plugin Integrations**: Ensures compatibility with popular plugins when using custom permalink structures, preventing conflicts and 404 errors.
+* **Multilingual Support**: Enhances compatibility with Polylang by allowing duplicate slugs for different languages, improving URL structure for multilingual sites.
 
 = Custom Permalinks Features =
 
@@ -25,6 +26,13 @@ The Focal Haus Core Plugin is a powerful toolkit that provides multiple essentia
 * Create cleaner, more SEO-friendly URLs
 * Maintain compatibility with popular plugins through our integrations system
 * Prevent 404 errors and redirect loops when using custom permalink structures
+
+= Multilingual Features =
+
+* Allow duplicate slugs for different languages when using Polylang
+* Create more intuitive URL structures for multilingual content
+* Maintain language-specific URLs without numeric suffixes
+* Seamless integration with Polylang's language management
 
 = Plugin Integrations =
 
@@ -65,6 +73,10 @@ This plugin follows WordPress security best practices:
 
 == Frequently Asked Questions ==
 
+= Does the multilingual support work with WPML? =
+
+Currently, the multilingual features are designed to work with Polylang. Support for WPML may be added in future updates.
+
 = Will the Hide Menu Items feature hide menu items for administrators? =
 
 No, administrators will always see all menu items. This feature only affects non-admin users.
@@ -91,6 +103,11 @@ This feature only hides menu items from the dashboard menu. It does not restrict
 2. The Hide Menu Items tab where administrators can select which menu items to hide.
 
 == Changelog ==
+
+= 1.1.3 =
+* Added new "Misc." tab for miscellaneous features
+* Added multilingual support with the ability to allow duplicate slugs for different languages when using Polylang
+* Improved URL structure for multilingual sites by removing the need for numeric suffixes in translated content
 
 = 1.1.2 =
 * Refactored CPT base slug removal logic to use a more robust method inspired by the 'Remove CPT Base' plugin.

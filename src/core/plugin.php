@@ -12,6 +12,7 @@ use FocalHaus\admin\Settings;
 use FocalHaus\MenuHiding\MenuHiding;
 use FocalHaus\Permalinks\Permalinks;
 use FocalHaus\Integrations\Integrations;
+use FocalHaus\misc\Misc;
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -93,5 +94,8 @@ class Plugin {
         
         // Initialize integrations module
         Integrations::get_instance();
+        
+        // Initialize misc module
+        Misc::get_instance();
     }
 }

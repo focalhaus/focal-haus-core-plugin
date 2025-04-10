@@ -94,6 +94,10 @@ class Settings {
                 'title' => __( 'Permalink Settings', 'focal-haus-core' ),
                 'callback' => array( $this, 'render_permalink_settings_tab' ),
             ),
+            'misc_settings' => array(
+                'title' => __( 'Misc.', 'focal-haus-core' ),
+                'callback' => array( $this, 'render_misc_settings_tab' ),
+            ),
             // Additional tabs can be added here
         );
 
@@ -241,10 +245,10 @@ class Settings {
      *
       * @since 1.0.0
       */
-     public function render_permalink_settings_tab() {
-         global $wp_post_types; // Needed for checking post types during save
+    public function render_permalink_settings_tab() {
+        global $wp_post_types; // Needed for checking post types during save
 
-         // Check if the form has been submitted
+        // Check if the form has been submitted
          if ( isset( $_POST['submit'] ) && isset( $_POST['fhc_permalink_nonce'] ) ) {
              // Verify nonce
              if ( check_admin_referer( 'fhc_save_permalink_settings', 'fhc_permalink_nonce' ) ) {
@@ -315,5 +319,16 @@ class Settings {
          // A simple way is to add a public reload method to Permalinks class, or just call load_cpt_without_base again if it's public.
          // Let's assume render_tab_content fetches fresh options via get_option() internally.
          $permalinks->render_tab_content();
-     }
- }
+    }
+    
+    /**
+     * Render the Misc Settings tab content.
+     *
+     * @since 1.1.3
+     */
+    public function render_misc_settings_tab() {
+        // Get the misc module instance and render its tab content
+        $misc = \FocalHaus\Misc\Misc::get_instance();
+        $misc->render_tab_content();
+    }
+}

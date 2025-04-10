@@ -274,16 +274,18 @@ class MenuHiding {
             return true;
         }
         
-        // Regular admin without whitelisting enabled see everything
+        // Get whitelist settings
         $menu_hiding_settings = get_option( 'fhc_menu_hiding_settings', array() );
         $use_whitelist = isset( $menu_hiding_settings['use_whitelist'] ) ? $menu_hiding_settings['use_whitelist'] : false;
         
-        if ( !$use_whitelist && current_user_can( 'administrator' ) ) {
-            return true;
-        }
-        
-        // Check if user's email is in the whitelist
-        if ( $use_whitelist ) {
+        // If user is an admin
+        if ( current_user_can( 'administrator' ) ) {
+            // If whitelist is not enabled, all admins see everything
+            if ( !$use_whitelist ) {
+                return true;
+            }
+            
+            // If whitelist is enabled, check if user is in the whitelist
             $current_user = wp_get_current_user();
             $user_email = $current_user->user_email;
             
@@ -292,11 +294,11 @@ class MenuHiding {
                 
             $emails_array = array_map( 'trim', explode( ',', $whitelisted_emails ) );
             
-            if ( in_array( $user_email, $emails_array ) ) {
-                return true;
-            }
+            // Return true only if admin's email is in the whitelist
+            return in_array( $user_email, $emails_array );
         }
         
+        // Non-admin users always have menu items hidden
         return false;
     }
 

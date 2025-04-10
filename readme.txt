@@ -3,7 +3,7 @@ Contributors: focalhausdev
 Tags: admin, dashboard, menu, hide, security, roles, core, multilingual, google tag manager, gtm
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -115,6 +115,10 @@ Excluding logged-in users (like administrators and editors) from tracking is a c
 2. The Hide Menu Items tab where administrators can select which menu items to hide.
 
 == Changelog ==
+
+= 1.1.6 =
+* Fixed a bug in the Admin Whitelist feature where all admins could see all menu items regardless of whitelist settings
+* Improved logic to properly restrict menu visibility for non-whitelisted admin users
 
 = 1.1.5 =
 * Added Google Tag Manager integration

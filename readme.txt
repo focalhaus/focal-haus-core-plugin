@@ -17,8 +17,8 @@ The Focal Haus Core Plugin is a powerful toolkit that provides multiple essentia
 
 * **Hide Dashboard Menu Items**: Allows administrators to choose which dashboard menu items will be hidden for non-admin users. This is particularly useful for client sites where you want to simplify the WordPress admin interface for your clients or restrict access to certain areas of the dashboard.
 * **Custom Permalinks**: Remove base slugs from Custom Post Types (CPTs) to create cleaner, more user-friendly URLs.
-* **Plugin Integrations**: Ensures compatibility with popular plugins when using custom permalink structures, preventing conflicts and 404 errors.
 * **Multilingual Support**: Enhances compatibility with Polylang by allowing duplicate slugs for different languages, improving URL structure for multilingual sites.
+* **Misc. Utilities**: Various utilities including custom login logo, admin toolbar customization, SEOPress editor access, and file editor security options.
 
 = Custom Permalinks Features =
 
@@ -34,22 +34,19 @@ The Focal Haus Core Plugin is a powerful toolkit that provides multiple essentia
 * Maintain language-specific URLs without numeric suffixes
 * Seamless integration with Polylang's language management
 
-= Plugin Integrations =
+= Misc. Utilities =
 
-The plugin includes special integrations to ensure compatibility with:
+The plugin includes several utility features:
 
-* SEOPress - Fixes sitemap generation for CPTs with removed base slugs
-* WooCommerce - Fixes shop page and product queries
-* TutorLMS - Prevents redirect issues with TutorLMS dashboard
-* LearnDash - Ensures compatibility with LearnDash course pages
-* Easy Digital Downloads - Maintains API functionality
-* And more...
+* **Custom Login Logo**: Add your own logo to the WordPress login page
+* **Admin Toolbar Customization**: Remove unnecessary items from the admin toolbar
+* **SEOPress Integration**: Give editor users full access to SEOPress features
+* **Security Options**: Disable Theme and Plugin File Editors for enhanced security
 
 = Hide Dashboard Menu Items Features =
 
 * User-friendly settings page with a clean, organized layout
 * Menu items organized in columns for better usability
-* Interactive UI with Check All/Uncheck All buttons
 * Visual feedback with highlighted selected items
 * Hide both top-level menu items and their submenu items
 * Only administrators can see and modify the settings
@@ -83,11 +80,7 @@ No, administrators will always see all menu items. This feature only affects non
 
 = Will removing CPT base slugs cause conflicts with other plugins? =
 
-Our plugin includes special integrations to prevent conflicts with popular plugins like SEOPress, WooCommerce, TutorLMS, LearnDash, and Easy Digital Downloads. If you encounter any issues with other plugins, please contact us for support.
-
-= Will SEOPress sitemaps work with CPTs that have their base slug removed? =
-
-Yes! We've added special integration for SEOPress to ensure that sitemaps work correctly for CPTs with removed base slugs. The plugin fixes the sitemap generation process to include all your custom post types in the sitemap, even when their base slugs are removed.
+The plugin is designed to work with most well-coded plugins. If you encounter any issues with specific plugins, please contact us for support.
 
 = Can I hide submenu items as well? =
 

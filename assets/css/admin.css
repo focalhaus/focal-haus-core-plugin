@@ -26,24 +26,7 @@
     margin: 20px 0;
 }
 
-/* Control buttons */
-.fhc-controls {
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #e5e5e5;
-    border-radius: 4px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
-    display: flex;
-    justify-content: flex-start;
-    gap: 10px;
-}
-
-.fhc-check-all,
-.fhc-uncheck-all {
-    min-width: 120px;
-    text-align: center;
-}
+/* No control buttons needed */
 
 /* Columns layout */
 .fhc-columns {
@@ -201,16 +184,7 @@
         width: 100%;
     }
     
-    .fhc-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .fhc-check-all,
-    .fhc-uncheck-all {
-        width: 100%;
-        margin-bottom: 5px;
-    }
+    /* No control buttons needed */
 }
 
 /* Debug info */

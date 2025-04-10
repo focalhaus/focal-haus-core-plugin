@@ -142,8 +142,6 @@ class Settings {
             'fhc-admin-scripts',
             'fhcL10n',
             array(
-                'checkAll'   => esc_html__( 'Check All', 'focal-haus-core' ),
-                'uncheckAll' => esc_html__( 'Uncheck All', 'focal-haus-core' ),
                 'saving'     => esc_html__( 'Saving...', 'focal-haus-core' ),
                 'saved'      => esc_html__( 'Settings saved.', 'focal-haus-core' ),
                 'error'      => esc_html__( 'Error saving settings.', 'focal-haus-core' ),

@@ -46,6 +46,8 @@ class Misc {
         'seopress_editor_access' => false,
         'custom_login_logo' => false,
         'login_logo_url' => '',
+        'disable_theme_editor' => false,
+        'disable_plugin_editor' => false,
     );
 
     /**
@@ -117,6 +119,20 @@ class Misc {
         if (isset($this->settings['custom_login_logo']) && $this->settings['custom_login_logo'] && !empty($this->settings['login_logo_url'])) {
             add_action('login_head', array($this, 'custom_login_logo'));
         }
+        
+        // Disable Theme Editor if enabled
+        if (isset($this->settings['disable_theme_editor']) && $this->settings['disable_theme_editor']) {
+            if (!defined('DISALLOW_FILE_EDIT')) {
+                define('DISALLOW_FILE_EDIT', true);
+            }
+        }
+        
+        // Disable Plugin Editor if enabled
+        if (isset($this->settings['disable_plugin_editor']) && $this->settings['disable_plugin_editor']) {
+            if (!defined('DISALLOW_FILE_EDIT') && !defined('DISALLOW_FILE_MODS')) {
+                define('DISALLOW_FILE_EDIT', true);
+            }
+        }
     }
     
     /**
@@ -181,7 +197,9 @@ class Misc {
                     'allow_duplicate_slugs',
                     'remove_toolbar_items',
                     'seopress_editor_access',
-                    'custom_login_logo'
+                    'custom_login_logo',
+                    'disable_theme_editor',
+                    'disable_plugin_editor'
                 );
                 
                 foreach ($checkboxes as $checkbox) {
@@ -276,6 +294,48 @@ class Misc {
                             </label>
                         </td>
                     </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_disable_theme_editor">
+                                <?php esc_html_e('Disable Theme Editor', 'focal-haus-core'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       name="fhc_misc_settings[disable_theme_editor]" 
+                                       id="fhc_disable_theme_editor"
+                                       value="1" 
+                                       <?php checked(isset($this->settings['disable_theme_editor']) && $this->settings['disable_theme_editor']); ?> />
+                                <?php esc_html_e('Disable the WordPress theme file editor for security.', 'focal-haus-core'); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e('This setting will take effect after the page is reloaded.', 'focal-haus-core'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_disable_plugin_editor">
+                                <?php esc_html_e('Disable Plugin Editor', 'focal-haus-core'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       name="fhc_misc_settings[disable_plugin_editor]" 
+                                       id="fhc_disable_plugin_editor"
+                                       value="1" 
+                                       <?php checked(isset($this->settings['disable_plugin_editor']) && $this->settings['disable_plugin_editor']); ?> />
+                                <?php esc_html_e('Disable the WordPress plugin file editor for security.', 'focal-haus-core'); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e('This setting will take effect after the page is reloaded.', 'focal-haus-core'); ?>
+                            </p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             
@@ -329,7 +389,7 @@ class Misc {
                             <div class="fhc-media-uploader" style="margin-top: 10px;">
                                 <input type="hidden" name="fhc_misc_settings[login_logo_url]" id="fhc_login_logo_url" value="<?php echo esc_attr($this->settings['login_logo_url']); ?>" />
                                 
-                                <div class="fhc-logo-preview" style="margin-bottom: 10px; max-width: 300px;">
+                                <div class="fhc-logo-preview" style="margin-bottom: 10px; max-width: 150px;">
                                     <?php if (!empty($this->settings['login_logo_url'])): ?>
                                         <img src="<?php echo esc_url($this->settings['login_logo_url']); ?>" style="max-width: 100%; height: auto;" />
                                     <?php endif; ?>
@@ -742,6 +802,8 @@ class Misc {
             background-image: url(' . $logo_url . ') !important;
             background-size: contain !important;
             width: 300px !important;
+            height: 200px !important;
+            max-width: 300px !important;
         }
         </style>';
     }

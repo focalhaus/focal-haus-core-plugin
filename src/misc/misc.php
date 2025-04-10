@@ -33,6 +33,20 @@ class Misc {
      * @var string
      */
     private $option_name = 'fhc_misc_settings';
+    
+    /**
+     * Default settings.
+     *
+     * @since 1.2.0
+     * @var array
+     */
+    private $default_settings = array(
+        'allow_duplicate_slugs' => false,
+        'remove_toolbar_items' => false,
+        'seopress_editor_access' => false,
+        'custom_login_logo' => false,
+        'login_logo_url' => '',
+    );
 
     /**
      * Initialize the class.
@@ -45,6 +59,9 @@ class Misc {
         
         // Initialize features based on settings
         $this->init_features();
+        
+        // Add admin scripts
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
     }
 
     /**
@@ -68,9 +85,10 @@ class Misc {
      * @since 1.1.3
      */
     private function load_settings() {
-        $this->settings = get_option( $this->option_name, array(
-            'allow_duplicate_slugs' => false,
-        ) );
+        $this->settings = get_option($this->option_name, $this->default_settings);
+        
+        // Ensure all default settings exist
+        $this->settings = wp_parse_args($this->settings, $this->default_settings);
     }
 
     /**
@@ -80,9 +98,50 @@ class Misc {
      */
     private function init_features() {
         // Initialize duplicate slugs feature if enabled
-        if ( isset( $this->settings['allow_duplicate_slugs'] ) && $this->settings['allow_duplicate_slugs'] ) {
+        if (isset($this->settings['allow_duplicate_slugs']) && $this->settings['allow_duplicate_slugs']) {
             $this->init_polylang_slug_feature();
         }
+        
+        // Initialize remove toolbar items if enabled
+        if (isset($this->settings['remove_toolbar_items']) && $this->settings['remove_toolbar_items']) {
+            add_action('admin_bar_menu', array($this, 'remove_toolbar_nodes'), 999);
+        }
+        
+        // Initialize SEOPress editor access if enabled
+        if (isset($this->settings['seopress_editor_access']) && $this->settings['seopress_editor_access']) {
+            add_filter('seopress_capability', array($this, 'seopress_grant_full_access_to_editors'), 10, 2);
+            add_action('init', array($this, 'seopress_add_editor_caps_to_redirections'));
+        }
+        
+        // Initialize custom login logo if enabled
+        if (isset($this->settings['custom_login_logo']) && $this->settings['custom_login_logo'] && !empty($this->settings['login_logo_url'])) {
+            add_action('login_head', array($this, 'custom_login_logo'));
+        }
+    }
+    
+    /**
+     * Enqueue scripts and styles for the admin area.
+     *
+     * @since 1.2.0
+     * @param string $hook The current admin page.
+     */
+    public function enqueue_admin_scripts($hook) {
+        // Only load on our settings page
+        if ('settings_page_focal-haus-core' !== $hook) {
+            return;
+        }
+        
+        // Enqueue the WordPress media scripts
+        wp_enqueue_media();
+        
+        // Enqueue custom script for media uploader
+        wp_enqueue_script(
+            'fhc-media-uploader',
+            FHC_PLUGIN_URL . 'assets/js/admin.js',
+            array('jquery'),
+            FHC_VERSION,
+            true
+        );
     }
     
     /**
@@ -111,23 +170,37 @@ class Misc {
      */
     public function render_tab_content() {
         // Check if the form has been submitted
-        if ( isset( $_POST['submit'] ) && isset( $_POST['fhc_misc_nonce'] ) ) {
+        if (isset($_POST['submit']) && isset($_POST['fhc_misc_nonce'])) {
             // Verify nonce
-            if ( check_admin_referer( 'fhc_save_misc_settings', 'fhc_misc_nonce' ) ) {
-                // Sanitize and prepare data for saving
-                $allow_duplicate_slugs = isset( $_POST['fhc_misc_settings']['allow_duplicate_slugs'] ) ? true : false;
+            if (check_admin_referer('fhc_save_misc_settings', 'fhc_misc_nonce')) {
+                // Get the old settings to check if we need to reinitialize capabilities
+                $old_settings = $this->settings;
                 
-                // Update settings
-                $this->settings['allow_duplicate_slugs'] = $allow_duplicate_slugs;
+                // Process checkbox settings
+                $checkboxes = array(
+                    'allow_duplicate_slugs',
+                    'remove_toolbar_items',
+                    'seopress_editor_access',
+                    'custom_login_logo'
+                );
+                
+                foreach ($checkboxes as $checkbox) {
+                    $this->settings[$checkbox] = isset($_POST['fhc_misc_settings'][$checkbox]) ? true : false;
+                }
+                
+                // Process the login logo URL
+                $this->settings['login_logo_url'] = isset($_POST['fhc_misc_settings']['login_logo_url']) 
+                    ? esc_url_raw($_POST['fhc_misc_settings']['login_logo_url']) 
+                    : '';
                 
                 // Save settings
-                update_option( $this->option_name, $this->settings );
+                update_option($this->option_name, $this->settings);
                 
                 // Add admin notice for successful save
                 add_settings_error(
                     'fhc_messages',
                     'fhc_message',
-                    __( 'Settings saved.', 'focal-haus-core' ),
+                    __('Settings saved.', 'focal-haus-core'),
                     'updated'
                 );
                 
@@ -136,31 +209,39 @@ class Misc {
                 
                 // Reinitialize features
                 $this->init_features();
+                
+                // Special handling for SEOPress editor access
+                if ($old_settings['seopress_editor_access'] != $this->settings['seopress_editor_access']) {
+                    // Flush rewrite rules when SEOPress access is toggled
+                    flush_rewrite_rules();
+                }
             } else {
                 // Nonce verification failed
                 add_settings_error(
                     'fhc_messages',
                     'fhc_message',
-                    __( 'Nonce verification failed. Settings not saved.', 'focal-haus-core' ),
+                    __('Nonce verification failed. Settings not saved.', 'focal-haus-core'),
                     'error'
                 );
             }
         }
         
         // Display settings errors/notices
-        settings_errors( 'fhc_messages' );
+        settings_errors('fhc_messages');
         
         // Render the form
         ?>
         <form method="post" action="">
-            <?php wp_nonce_field( 'fhc_save_misc_settings', 'fhc_misc_nonce' ); ?>
+            <?php wp_nonce_field('fhc_save_misc_settings', 'fhc_misc_nonce'); ?>
+            
+            <h2><?php esc_html_e('WordPress Features', 'focal-haus-core'); ?></h2>
             
             <table class="form-table">
                 <tbody>
                     <tr>
                         <th scope="row">
                             <label for="fhc_allow_duplicate_slugs">
-                                <?php esc_html_e( 'Allow Duplicate Slugs for Different Languages', 'focal-haus-core' ); ?>
+                                <?php esc_html_e('Allow Duplicate Slugs for Different Languages', 'focal-haus-core'); ?>
                             </label>
                         </th>
                         <td>
@@ -169,12 +250,151 @@ class Misc {
                                        name="fhc_misc_settings[allow_duplicate_slugs]" 
                                        id="fhc_allow_duplicate_slugs"
                                        value="1" 
-                                       <?php checked( isset( $this->settings['allow_duplicate_slugs'] ) && $this->settings['allow_duplicate_slugs'] ); ?> />
-                                <?php esc_html_e( 'Enable this feature to allow posts in different languages to use the same slug when using Polylang.', 'focal-haus-core' ); ?>
+                                       <?php checked(isset($this->settings['allow_duplicate_slugs']) && $this->settings['allow_duplicate_slugs']); ?> />
+                                <?php esc_html_e('Enable this feature to allow posts in different languages to use the same slug when using Polylang.', 'focal-haus-core'); ?>
                             </label>
                             <p class="description">
-                                <?php esc_html_e( 'This feature requires the Polylang plugin to be active.', 'focal-haus-core' ); ?>
+                                <?php esc_html_e('This feature requires the Polylang plugin to be active.', 'focal-haus-core'); ?>
                             </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_remove_toolbar_items">
+                                <?php esc_html_e('Remove Toolbar Items', 'focal-haus-core'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       name="fhc_misc_settings[remove_toolbar_items]" 
+                                       id="fhc_remove_toolbar_items"
+                                       value="1" 
+                                       <?php checked(isset($this->settings['remove_toolbar_items']) && $this->settings['remove_toolbar_items']); ?> />
+                                <?php esc_html_e('Remove WordPress logo and stats from the admin toolbar.', 'focal-haus-core'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2><?php esc_html_e('Plugin Integrations', 'focal-haus-core'); ?></h2>
+            
+            <table class="form-table">
+                <tbody>
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_seopress_editor_access">
+                                <?php esc_html_e('SEOPress | Give Editors Full Rights', 'focal-haus-core'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       name="fhc_misc_settings[seopress_editor_access]" 
+                                       id="fhc_seopress_editor_access"
+                                       value="1" 
+                                       <?php checked(isset($this->settings['seopress_editor_access']) && $this->settings['seopress_editor_access']); ?> />
+                                <?php esc_html_e('Grant Editor role full access to SEOPress features, including redirections.', 'focal-haus-core'); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e('This feature requires the SEOPress plugin to be active.', 'focal-haus-core'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2><?php esc_html_e('Branding', 'focal-haus-core'); ?></h2>
+            
+            <table class="form-table">
+                <tbody>
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_custom_login_logo">
+                                <?php esc_html_e('Change WordPress Login Logo', 'focal-haus-core'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       name="fhc_misc_settings[custom_login_logo]" 
+                                       id="fhc_custom_login_logo"
+                                       value="1" 
+                                       <?php checked(isset($this->settings['custom_login_logo']) && $this->settings['custom_login_logo']); ?> />
+                                <?php esc_html_e('Use custom logo on the WordPress login page.', 'focal-haus-core'); ?>
+                            </label>
+                            
+                            <div class="fhc-media-uploader" style="margin-top: 10px;">
+                                <input type="hidden" name="fhc_misc_settings[login_logo_url]" id="fhc_login_logo_url" value="<?php echo esc_attr($this->settings['login_logo_url']); ?>" />
+                                
+                                <div class="fhc-logo-preview" style="margin-bottom: 10px; max-width: 300px;">
+                                    <?php if (!empty($this->settings['login_logo_url'])): ?>
+                                        <img src="<?php echo esc_url($this->settings['login_logo_url']); ?>" style="max-width: 100%; height: auto;" />
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <input type="button" id="fhc_logo_upload_button" class="button" value="<?php esc_attr_e('Select Logo', 'focal-haus-core'); ?>" />
+                                <?php if (!empty($this->settings['login_logo_url'])): ?>
+                                    <input type="button" id="fhc_logo_remove_button" class="button" value="<?php esc_attr_e('Remove Logo', 'focal-haus-core'); ?>" />
+                                <?php endif; ?>
+                                
+                                <p class="description">
+                                    <?php esc_html_e('Select an image to use as the login page logo. Recommended size: 300px wide.', 'focal-haus-core'); ?>
+                                </p>
+                            </div>
+                            
+                            <script type="text/javascript">
+                            jQuery(document).ready(function($) {
+                                // Media uploader
+                                $('#fhc_logo_upload_button').click(function(e) {
+                                    e.preventDefault();
+                                    
+                                    var image_frame;
+                                    
+                                    if (image_frame) {
+                                        image_frame.open();
+                                    }
+                                    
+                                    // Define image_frame as wp.media object
+                                    image_frame = wp.media({
+                                        title: '<?php esc_attr_e('Select Media', 'focal-haus-core'); ?>',
+                                        multiple: false,
+                                        library: {
+                                            type: 'image'
+                                        }
+                                    });
+                                    
+                                    image_frame.on('select', function() {
+                                        // Get media attachment details from the frame state
+                                        var attachment = image_frame.state().get('selection').first().toJSON();
+                                        
+                                        // Send the attachment URL to our custom image input field.
+                                        $('#fhc_login_logo_url').val(attachment.url);
+                                        
+                                        // Update preview
+                                        $('.fhc-logo-preview').html('<img src="' + attachment.url + '" style="max-width: 100%; height: auto;" />');
+                                        
+                                        // Show remove button
+                                        if (!$('#fhc_logo_remove_button').length) {
+                                            $('#fhc_logo_upload_button').after(' <input type="button" id="fhc_logo_remove_button" class="button" value="<?php esc_attr_e('Remove Logo', 'focal-haus-core'); ?>" />');
+                                        }
+                                    });
+                                    
+                                    // Open media uploader
+                                    image_frame.open();
+                                });
+                                
+                                // Remove image
+                                $(document).on('click', '#fhc_logo_remove_button', function(e) {
+                                    e.preventDefault();
+                                    $('#fhc_login_logo_url').val('');
+                                    $('.fhc-logo-preview').html('');
+                                    $(this).remove();
+                                });
+                            });
+                            </script>
                         </td>
                     </tr>
                 </tbody>
@@ -463,5 +683,66 @@ class Misc {
             return $polylang->model->where_clause( $lang, 'post' );
         }
         return '';
+    }
+    
+    /**
+     * Remove items from WordPress admin toolbar.
+     *
+     * @since 1.2.0
+     * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
+     */
+    public function remove_toolbar_nodes($wp_admin_bar) {
+        $wp_admin_bar->remove_node('wp-logo');
+        $wp_admin_bar->remove_node('stats');
+    }
+    
+    /**
+     * Grant full access to SEOPress features for editors.
+     *
+     * @since 1.2.0
+     * @param string $cap The capability being checked.
+     * @param string $context The context of the check.
+     * @return string The modified capability.
+     */
+    public function seopress_grant_full_access_to_editors($cap, $context) {
+        if ($context === 'redirections' || $context === 'manage_redirections') {
+            $cap = 'edit_posts'; // Allow editors access to redirections
+        } else {
+            $cap = 'edit_posts'; // Default access for all other SEOPress sections
+        }
+        return $cap;
+    }
+    
+    /**
+     * Add editor capabilities for SEOPress redirections.
+     *
+     * @since 1.2.0
+     */
+    public function seopress_add_editor_caps_to_redirections() {
+        $role = get_role('editor');
+        if ($role) {
+            $role->add_cap('edit_seopress_404');     // Allow editing redirections
+            $role->add_cap('edit_others_seopress_404'); // Allow editing others' redirections
+            $role->add_cap('publish_seopress_404');  // Allow publishing redirections
+            $role->add_cap('delete_seopress_404');   // Allow deleting redirections
+        }
+    }
+    
+    /**
+     * Customize the WordPress login page logo.
+     *
+     * @since 1.2.0
+     */
+    public function custom_login_logo() {
+        $logo_url = esc_url($this->settings['login_logo_url']);
+        if (empty($logo_url)) return;
+        
+        echo '<style type="text/css">
+        h1 a { 
+            background-image: url(' . $logo_url . ') !important;
+            background-size: contain !important;
+            width: 300px !important;
+        }
+        </style>';
     }
 }

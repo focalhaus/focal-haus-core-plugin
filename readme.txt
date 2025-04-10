@@ -3,7 +3,7 @@ Contributors: focalhausdev
 Tags: admin, dashboard, menu, hide, security, roles, core, multilingual, google tag manager, gtm
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.9
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -115,6 +115,12 @@ Excluding logged-in users (like administrators and editors) from tracking is a c
 2. The Hide Menu Items tab where administrators can select which menu items to hide.
 
 == Changelog ==
+
+= 1.2.0 =
+* Added "Check All / Uncheck All" toggle to the Hide Menu Items feature
+* Improved usability for managing multiple menu items at once
+* Streamlined workflow for hiding or showing many menu items
+* Enhanced user interface with consistent styling
 
 = 1.1.9 =
 * Added enhanced security for plugin settings

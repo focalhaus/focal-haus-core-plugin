@@ -63,6 +63,32 @@
     border-color: #8c8f94;
 }
 
+/* Toggle All Controls */
+.fhc-toggle-all-container {
+    margin: 10px 0 20px;
+    padding: 12px 15px;
+    background-color: #f8f8f8;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.fhc-toggle-all-label {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.fhc-toggle-all-checkbox {
+    margin-right: 8px !important;
+}
+
+.fhc-toggle-all-container .description {
+    margin: 5px 0 0 24px;
+    color: #666;
+}
+
 /* Menu section headers */
 .fhc-menu-section {
     margin: 0;

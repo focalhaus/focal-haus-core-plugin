@@ -537,6 +537,19 @@ class MenuHiding {
             
             <div class="fhc-section">
                 <h3><?php esc_html_e( 'Menu Items to Hide', 'focal-haus-core' ); ?></h3>
+                <div class="fhc-toggle-all-container">
+                    <label class="fhc-toggle-all-label">
+                        <input 
+                            type="checkbox" 
+                            id="fhc_toggle_all" 
+                            class="fhc-toggle-all-checkbox"
+                        >
+                        <span id="fhc_toggle_all_text"><?php esc_html_e( 'Check All', 'focal-haus-core' ); ?></span>
+                    </label>
+                    <p class="description">
+                        <?php esc_html_e( 'Quickly select or deselect all menu items at once.', 'focal-haus-core' ); ?>
+                    </p>
+                </div>
             </div>
             
             <div class="fhc-grid-container">

@@ -1,0 +1,236 @@
+/**
+ * Focal Haus Core - Admin Styles
+ *
+ * @package Focal_Haus_Core
+ */
+
+/* Tab Navigation */
+.nav-tab-wrapper {
+    margin-bottom: 20px;
+}
+
+.tab-content {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-top: none;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.fhc-tab-description {
+    margin-bottom: 20px;
+}
+
+/* Grid container */
+.fhc-grid-container {
+    margin: 20px 0;
+}
+
+/* Control buttons */
+.fhc-controls {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.fhc-check-all,
+.fhc-uncheck-all {
+    min-width: 120px;
+    text-align: center;
+}
+
+/* Columns layout */
+.fhc-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.fhc-column {
+    flex: 1 1 calc(33.333% - 20px);
+    min-width: 250px;
+    max-width: calc(33.333% - 20px);
+}
+
+/* Menu groups */
+.fhc-menu-group {
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+/* Checked states */
+.fhc-menu-group.fhc-checked {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.fhc-menu-group.fhc-has-checked-submenu {
+    border-color: #8c8f94;
+}
+
+/* Menu section headers */
+.fhc-menu-section {
+    margin: 0;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #23282d;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e5e5e5;
+    border-radius: 3px 3px 0 0;
+    transition: all 0.2s ease;
+}
+
+.fhc-checked .fhc-menu-section {
+    background-color: #f0f6fc;
+    color: #2271b1;
+}
+
+/* Menu items */
+.fhc-menu-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f5f5f5;
+    transition: all 0.2s ease;
+}
+
+.fhc-menu-item:has(input[type="checkbox"]:checked) {
+    background-color: #f0f6fc;
+}
+
+/* Submenu items */
+.fhc-submenu-item {
+    padding: 6px 12px 6px 30px;
+    position: relative;
+    border-bottom: 1px solid #f5f5f5;
+    transition: all 0.2s ease;
+}
+
+.fhc-submenu-item:has(input[type="checkbox"]:checked) {
+    background-color: #f0f6fc;
+}
+
+.fhc-submenu-item:before {
+    content: '└─';
+    position: absolute;
+    left: 12px;
+    color: #999;
+}
+
+.fhc-submenu-item:last-child {
+    border-bottom: none;
+}
+
+/* Checkbox labels */
+.fhc-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.fhc-checkbox-label input[type="checkbox"] {
+    margin: 2px 8px 0 0;
+    flex-shrink: 0;
+}
+
+.fhc-menu-title {
+    font-size: 13px;
+    line-height: 1.4;
+    flex-grow: 1;
+    word-break: break-word;
+}
+
+/* Hover effects */
+.fhc-menu-item:hover,
+.fhc-submenu-item:hover {
+    background-color: #f8f8f8;
+}
+
+.fhc-menu-item:has(input[type="checkbox"]:checked):hover,
+.fhc-submenu-item:has(input[type="checkbox"]:checked):hover {
+    background-color: #e6f0fa;
+}
+
+/* Section info */
+.fhc-section-info {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fff;
+    border-left: 4px solid #00a0d2;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* Notice */
+.fhc-notice {
+    padding: 12px;
+    background-color: #fff;
+    border-left: 4px solid #dc3232;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 1200px) {
+    .fhc-column {
+        flex: 1 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .fhc-columns {
+        flex-direction: column;
+    }
+    
+    .fhc-column {
+        flex: 1 1 100%;
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    .fhc-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .fhc-check-all,
+    .fhc-uncheck-all {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+/* Debug info */
+.fhc-debug-info {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    display: none; /* Hidden by default */
+}
+
+.fhc-debug-info h3 {
+    margin-top: 0;
+}
+
+.fhc-debug-info pre {
+    background-color: #fff;
+    padding: 10px;
+    overflow: auto;
+    max-height: 300px;
+    border: 1px solid #e5e5e5;
+}

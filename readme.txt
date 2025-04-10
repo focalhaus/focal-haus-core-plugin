@@ -3,7 +3,7 @@ Contributors: focalhausdev
 Tags: admin, dashboard, menu, hide, security, roles, core, multilingual, google tag manager, gtm
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,7 +40,9 @@ The Focal Haus Core Plugin is a powerful toolkit that provides multiple essentia
 * Simple configuration with a clean user interface
 * Add your Google Tag Manager ID in one central location
 * Automatically insert GTM code in both header and body sections
-* Option to exclude logged-in users from tracking
+* Granular tracking controls for different user roles
+* Option to exclude all logged-in users from tracking
+* Option to track subscriber users while excluding higher-level users
 * Code preview showing exactly what will be added to your site
 * Proper implementation following Google's recommended practices
 * Works with any WordPress theme that supports the wp_head and wp_body_open hooks
@@ -109,12 +111,22 @@ The Google Tag Manager integration will work with any theme that properly implem
 
 Excluding logged-in users (like administrators and editors) from tracking is a common practice to avoid skewing your analytics data with internal traffic. The plugin gives you the option to enable or disable this feature based on your needs.
 
+= Why would I want to track subscribers but not other logged-in users? =
+
+For membership sites, online courses, or subscription-based content, tracking subscribers' behavior is often critical for understanding user engagement and improving content. The "Track Subscribers Only" option lets you exclude staff and higher-level users (who might skew your analytics) while still gathering valuable data about your actual subscribers' behavior.
+
 == Screenshots ==
 
 1. The main settings page with tabs for different functionalities.
 2. The Hide Menu Items tab where administrators can select which menu items to hide.
 
 == Changelog ==
+
+= 1.2.1 =
+* Enhanced Google Tag Manager with more granular user tracking controls
+* Added "Track Subscribers Only" option to exclude higher-level user roles but include subscribers
+* Improved conditional UI for GTM tracking settings
+* Updated code preview to show exact tracking conditions being implemented
 
 = 1.2.0 =
 * Added "Check All / Uncheck All" toggle to the Hide Menu Items feature

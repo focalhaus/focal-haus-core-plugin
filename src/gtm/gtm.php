@@ -69,6 +69,7 @@ class GTM {
                 'enabled' => false,
                 'gtm_id' => '',
                 'exclude_logged_in' => true,
+                'track_subscribers' => false,
             ) );
         }
         
@@ -81,6 +82,7 @@ class GTM {
                     'enabled' => false,
                     'gtm_id' => '',
                     'exclude_logged_in' => true,
+                    'track_subscribers' => false,
                 ),
             )
         );
@@ -124,6 +126,9 @@ class GTM {
         // Sanitize exclude_logged_in (boolean)
         $sanitized_input['exclude_logged_in'] = isset( $input['exclude_logged_in'] ) && $input['exclude_logged_in'] ? true : false;
         
+        // Sanitize track_subscribers (boolean)
+        $sanitized_input['track_subscribers'] = isset( $input['track_subscribers'] ) && $input['track_subscribers'] ? true : false;
+        
         return $sanitized_input;
     }
 
@@ -139,11 +144,18 @@ class GTM {
         $enabled = isset( $gtm_settings['enabled'] ) ? $gtm_settings['enabled'] : false;
         $gtm_id = isset( $gtm_settings['gtm_id'] ) ? $gtm_settings['gtm_id'] : '';
         $exclude_logged_in = isset( $gtm_settings['exclude_logged_in'] ) ? $gtm_settings['exclude_logged_in'] : true;
+        $track_subscribers = isset( $gtm_settings['track_subscribers'] ) ? $gtm_settings['track_subscribers'] : false;
         
         if ( $enabled && ! empty( $gtm_id ) ) {
             // Check if we should exclude logged-in users
             if ( $exclude_logged_in && is_user_logged_in() ) {
-                return; // Skip for logged-in users
+                // If track_subscribers is enabled, check if the current user is a subscriber
+                if ( $track_subscribers && current_user_can( 'subscriber' ) && !current_user_can( 'edit_posts' ) ) {
+                    // Allow tracking for subscribers
+                } else {
+                    // Skip for other logged-in users
+                    return;
+                }
             }
             
             // Output the GTM head script
@@ -171,11 +183,18 @@ class GTM {
         $enabled = isset( $gtm_settings['enabled'] ) ? $gtm_settings['enabled'] : false;
         $gtm_id = isset( $gtm_settings['gtm_id'] ) ? $gtm_settings['gtm_id'] : '';
         $exclude_logged_in = isset( $gtm_settings['exclude_logged_in'] ) ? $gtm_settings['exclude_logged_in'] : true;
+        $track_subscribers = isset( $gtm_settings['track_subscribers'] ) ? $gtm_settings['track_subscribers'] : false;
         
         if ( $enabled && ! empty( $gtm_id ) ) {
             // Check if we should exclude logged-in users
             if ( $exclude_logged_in && is_user_logged_in() ) {
-                return; // Skip for logged-in users
+                // If track_subscribers is enabled, check if the current user is a subscriber
+                if ( $track_subscribers && current_user_can( 'subscriber' ) && !current_user_can( 'edit_posts' ) ) {
+                    // Allow tracking for subscribers
+                } else {
+                    // Skip for other logged-in users
+                    return;
+                }
             }
             
             // Output the GTM body script
@@ -275,6 +294,25 @@ class GTM {
                         </span>
                     </td>
                 </tr>
+                <tr class="fhc-track-subscribers-row" <?php echo (!isset($gtm_settings['exclude_logged_in']) || !$gtm_settings['exclude_logged_in']) ? 'style="display:none;"' : ''; ?>>
+                    <th scope="row">
+                        <label for="fhc_gtm_track_subscribers">
+                            <?php esc_html_e( 'Track Subscribers Only', 'focal-haus-core' ); ?>
+                        </label>
+                    </th>
+                    <td>
+                        <input 
+                            type="checkbox" 
+                            id="fhc_gtm_track_subscribers" 
+                            name="fhc_gtm_settings[track_subscribers]" 
+                            value="1" 
+                            <?php checked( isset( $gtm_settings['track_subscribers'] ) && $gtm_settings['track_subscribers'] ); ?>
+                        >
+                        <span class="description">
+                            <?php esc_html_e( 'Enable this to still track subscriber-level users even when excluding other logged-in users.', 'focal-haus-core' ); ?>
+                        </span>
+                    </td>
+                </tr>
             </table>
             
             <?php submit_button(); ?>
@@ -286,7 +324,21 @@ class GTM {
                     <h4><?php esc_html_e( 'Header Code (wp_head)', 'focal-haus-core' ); ?></h4>
                     <pre><?php
                     $gtm_id = isset( $gtm_settings['gtm_id'] ) && !empty( $gtm_settings['gtm_id'] ) ? $gtm_settings['gtm_id'] : 'GTM-XXXXXX';
-                    echo esc_html( '<?php if ( ' . ( isset( $gtm_settings['exclude_logged_in'] ) && $gtm_settings['exclude_logged_in'] ? '! is_user_logged_in()' : 'true' ) . ' ) : ?>' . "\n" );
+                    $exclude_logged_in = isset( $gtm_settings['exclude_logged_in'] ) && $gtm_settings['exclude_logged_in'];
+                    $track_subscribers = isset( $gtm_settings['track_subscribers'] ) && $gtm_settings['track_subscribers'];
+                    
+                    if (!$exclude_logged_in) {
+                        echo esc_html( '<?php /* All users are tracked */ ?>' . "\n" );
+                        $condition = 'true';
+                    } elseif ($exclude_logged_in && !$track_subscribers) {
+                        echo esc_html( '<?php /* Only non-logged-in users are tracked */ ?>' . "\n" );
+                        $condition = '! is_user_logged_in()';
+                    } else {
+                        echo esc_html( '<?php /* Non-logged-in users and subscribers are tracked */ ?>' . "\n" );
+                        $condition = '! is_user_logged_in() || (current_user_can("subscriber") && !current_user_can("edit_posts"))';
+                    }
+                    
+                    echo esc_html( '<?php if ( ' . $condition . ' ) : ?>' . "\n" );
                     echo esc_html( '    <!-- Google Tag Manager -->' . "\n" );
                     echo esc_html( '    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":' . "\n" );
                     echo esc_html( '    new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],' . "\n" );
@@ -301,7 +353,18 @@ class GTM {
                 <div class="fhc-code-container">
                     <h4><?php esc_html_e( 'Body Code (wp_body_open)', 'focal-haus-core' ); ?></h4>
                     <pre><?php
-                    echo esc_html( '<?php if ( ' . ( isset( $gtm_settings['exclude_logged_in'] ) && $gtm_settings['exclude_logged_in'] ? '! is_user_logged_in()' : 'true' ) . ' ) : ?>' . "\n" );
+                    if (!$exclude_logged_in) {
+                        echo esc_html( '<?php /* All users are tracked */ ?>' . "\n" );
+                        $condition = 'true';
+                    } elseif ($exclude_logged_in && !$track_subscribers) {
+                        echo esc_html( '<?php /* Only non-logged-in users are tracked */ ?>' . "\n" );
+                        $condition = '! is_user_logged_in()';
+                    } else {
+                        echo esc_html( '<?php /* Non-logged-in users and subscribers are tracked */ ?>' . "\n" );
+                        $condition = '! is_user_logged_in() || (current_user_can("subscriber") && !current_user_can("edit_posts"))';
+                    }
+                    
+                    echo esc_html( '<?php if ( ' . $condition . ' ) : ?>' . "\n" );
                     echo esc_html( '    <!-- Google Tag Manager (noscript) -->' . "\n" );
                     echo esc_html( '    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . $gtm_id . '"' . "\n" );
                     echo esc_html( '    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' . "\n" );

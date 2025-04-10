@@ -17,6 +17,23 @@
                 this.setupEventListeners();
                 this.setupFormSubmission();
                 this.initializeCheckedStates();
+                this.setupGTMSettings();
+            },
+            
+            /**
+             * Set up Google Tag Manager settings interactions
+             */
+            setupGTMSettings: function() {
+                // Show/hide Track Subscribers option based on Exclude Logged-in Users toggle
+                $('#fhc_gtm_exclude_logged_in').on('change', function() {
+                    if ($(this).prop('checked')) {
+                        $('.fhc-track-subscribers-row').show();
+                    } else {
+                        $('.fhc-track-subscribers-row').hide();
+                        // Uncheck the track subscribers checkbox when hiding it
+                        $('#fhc_gtm_track_subscribers').prop('checked', false);
+                    }
+                });
             },
 
             /**

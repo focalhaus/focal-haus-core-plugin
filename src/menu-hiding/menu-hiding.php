@@ -41,10 +41,6 @@ class MenuHiding {
         
         // Block access to hidden pages for non-admin users and non-whitelisted admin users.
         add_action('admin_init', array($this, 'block_hidden_page_access'), 1);
-        
-        // Filter user capabilities for non-whitelisted admins
-        // This is a more forceful approach that ensures menu items are hidden
-        add_filter('user_has_cap', array($this, 'filter_admin_capabilities'), 999, 3);
     }
 
     /**
@@ -274,45 +270,40 @@ class MenuHiding {
      * @return bool True if user should see all items, false otherwise.
      */
     private function user_can_see_all_items() {
-        global $current_user;
-        
-        // Make sure current user information is loaded
-        if (!isset($current_user) || !$current_user->exists()) {
-            wp_get_current_user();
-        }
-        
-        // 1. Network admins (super admins) always see everything
+        // Super admins always see everything
         if (is_multisite() && is_super_admin()) {
             return true;
         }
         
-        // 2. Get whitelist settings
+        // Get whitelist settings
         $menu_hiding_settings = get_option('fhc_menu_hiding_settings', array());
-        $use_whitelist = isset($menu_hiding_settings['use_whitelist']) && $menu_hiding_settings['use_whitelist'] === true;
+        $use_whitelist = isset($menu_hiding_settings['use_whitelist']) && $menu_hiding_settings['use_whitelist'];
         
-        // 3. If user is not an admin, they never see restricted items
+        // If user is not an admin, they never see restricted items
         if (!current_user_can('administrator')) {
             return false;
         }
         
-        // 4. At this point, user is an admin but not a super admin
-        
-        // 5. If whitelist is disabled, admin sees everything
+        // If whitelist is disabled, admin sees everything
         if (!$use_whitelist) {
             return true;
         }
         
-        // 6. Whitelist is enabled - check if admin's email is in the whitelist
+        // Whitelist is enabled - check if admin's email is in the whitelist
+        $current_user = wp_get_current_user();
         $user_email = $current_user->user_email;
         
-        // Get and parse whitelisted emails
+        // Get whitelisted emails
         $whitelisted_emails = isset($menu_hiding_settings['whitelisted_emails']) ? 
             $menu_hiding_settings['whitelisted_emails'] : '';
         
-        // Convert comma-separated string to array and trim whitespace
-        $emails_array = array_map('trim', explode(',', $whitelisted_emails));
+        // Simple string search first (faster)
+        if (strpos($whitelisted_emails, $user_email) === false) {
+            return false;
+        }
         
-        // Return true only if admin's email is in the whitelist
+        // Detailed check with proper parsing
+        $emails_array = array_map('trim', explode(',', $whitelisted_emails));
         return in_array($user_email, $emails_array);
     }
 
@@ -406,28 +397,16 @@ class MenuHiding {
     }
 
     /**
-     * Hide menu and submenu items for non-authorized users.
+     * Hide menu and submenu items for non-admin users or non-whitelisted admin users.
      *
      * @since 1.0.0
      */
     public function hide_menu_items() {
-        // First, check if debugging is necessary
-        $should_debug = defined('WP_DEBUG') && WP_DEBUG;
-        
-        // Check if user should see all items
-        $can_see_all = $this->user_can_see_all_items();
-        
-        // If user can see all items, return early
-        if ($can_see_all) {
-            if ($should_debug && is_admin()) {
-                // You can enable this for debugging
-                // add_action('admin_notices', function() {
-                //     echo '<div class="notice notice-info"><p>FHC Debug: You have permission to see all menu items.</p></div>';
-                // });
-            }
+        // Skip if user can see all items
+        if ($this->user_can_see_all_items()) {
             return;
         }
-        
+
         // Get hidden menu items
         $hidden_menu_items = get_option('fhc_hidden_menu_items', array());
         
@@ -443,34 +422,15 @@ class MenuHiding {
             return;
         }
         
-        // Get current user info for debugging
-        if ($should_debug) {
-            $current_user = wp_get_current_user();
-            $user_email = $current_user->user_email;
-            $menu_hiding_settings = get_option('fhc_menu_hiding_settings', array());
-            $use_whitelist = isset($menu_hiding_settings['use_whitelist']) && $menu_hiding_settings['use_whitelist'] === true;
-            $is_admin = current_user_can('administrator');
-            
-            // You can enable this for debugging
-            // add_action('admin_notices', function() use ($user_email, $use_whitelist, $is_admin) {
-            //     echo '<div class="notice notice-info"><p>FHC Debug: Email: ' . esc_html($user_email) . 
-            //         ', Is Admin: ' . ($is_admin ? 'Yes' : 'No') . 
-            //         ', Whitelist Enabled: ' . ($use_whitelist ? 'Yes' : 'No') . 
-            //         '</p></div>';
-            // });
-        }
-        
         // Hide each selected menu/submenu item
         foreach ($hidden_menu_items as $encoded_key => $value) {
-            // Decode the key to get the original slug
             $decoded_key = $this->decode_menu_slug($encoded_key);
             
-            // Check if it's a submenu item (contains a pipe character)
+            // Handle submenu items
             if (strpos($decoded_key, '|') !== false) {
                 list($parent_slug, $submenu_slug) = explode('|', $decoded_key);
                 
-                // Make sure the parent menu and submenu exist
-                if (isset($submenu[$parent_slug]) && is_array($submenu[$parent_slug])) {
+                if (isset($submenu[$parent_slug])) {
                     foreach ($submenu[$parent_slug] as $index => $item) {
                         if ($item[2] === $submenu_slug) {
                             unset($submenu[$parent_slug][$index]);
@@ -479,7 +439,7 @@ class MenuHiding {
                     }
                 }
             } else {
-                // It's a top-level menu item
+                // Handle top-level menu items
                 foreach ($menu as $index => $item) {
                     if ($item[2] === $decoded_key) {
                         unset($menu[$index]);
@@ -492,99 +452,9 @@ class MenuHiding {
                 }
             }
         }
-        
-        // Ensure that submenu arrays don't have gaps in keys which can cause display issues
-        if (is_array($submenu)) {
-            foreach ($submenu as $parent_slug => $submenu_items) {
-                if (is_array($submenu_items)) {
-                    $submenu[$parent_slug] = array_values($submenu_items);
-                }
-            }
-        }
     }
 
-    /**
-     * Filter user capabilities to restrict access for non-whitelisted admins
-     * 
-     * @since 1.1.7
-     * @param array $allcaps All capabilities of the user
-     * @param array $caps    Required capabilities
-     * @param array $args    [0] Requested capability
-     *                       [1] User ID
-     *                       [2] Associated object ID
-     * @return array Modified capabilities
-     */
-    public function filter_admin_capabilities($allcaps, $caps, $args) {
-        // Only apply in admin area
-        if (!is_admin()) {
-            return $allcaps;
-        }
-        
-        // Skip if user should see all items
-        if ($this->user_can_see_all_items()) {
-            return $allcaps;
-        }
-        
-        // Only apply for administrators
-        if (!isset($allcaps['administrator']) || !$allcaps['administrator']) {
-            return $allcaps;
-        }
-        
-        // Get hidden menu items
-        $hidden_menu_items = get_option('fhc_hidden_menu_items', array());
-        if (empty($hidden_menu_items)) {
-            return $allcaps;
-        }
-        
-        // Check if we're on a page that should be restricted
-        $current_screen = get_current_screen();
-        $current_page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-        
-        // Map of common menu slugs to their required capabilities
-        $capability_map = array(
-            'edit.php' => 'edit_posts',
-            'upload.php' => 'upload_files',
-            'edit-comments.php' => 'moderate_comments',
-            'themes.php' => 'switch_themes',
-            'plugins.php' => 'activate_plugins',
-            'users.php' => 'list_users',
-            'tools.php' => 'edit_posts',
-            'options-general.php' => 'manage_options',
-        );
-        
-        global $pagenow;
-        
-        // Check if the current page should be restricted
-        foreach ($hidden_menu_items as $encoded_key => $value) {
-            $decoded_key = $this->decode_menu_slug($encoded_key);
-            
-            // For top-level menu items
-            if (isset($capability_map[$decoded_key]) && $pagenow === $decoded_key) {
-                $allcaps[$capability_map[$decoded_key]] = false;
-            }
-            
-            // For submenu items
-            if (strpos($decoded_key, '|') !== false) {
-                list($parent_slug, $submenu_slug) = explode('|', $decoded_key);
-                
-                // Check if we're on this submenu page
-                if ($pagenow === $parent_slug && 
-                    (($current_page && $current_page === $submenu_slug) || 
-                     ($submenu_slug === $current_page))) {
-                    
-                    // If parent is in capability map, restrict that capability
-                    if (isset($capability_map[$parent_slug])) {
-                        $allcaps[$capability_map[$parent_slug]] = false;
-                    }
-                    
-                    // Restrict manage_options as a fallback
-                    $allcaps['manage_options'] = false;
-                }
-            }
-        }
-        
-        return $allcaps;
-    }
+
 
     /**
      * Render the Hide Menu Items tab content.

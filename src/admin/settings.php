@@ -6,10 +6,10 @@
  * @subpackage Admin
  */
 
-namespace FocalCore\admin;
+namespace FocalHaus\admin;
 
-use FocalCore\MenuHiding\MenuHiding;
-use FocalCore\Permalinks\Permalinks;
+use FocalHaus\MenuHiding\MenuHiding;
+use FocalHaus\Permalinks\Permalinks;
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,7 +55,7 @@ class Settings {
         add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
         
         // Add settings link on plugin page.
-        add_filter( 'plugin_action_links_' . FCS_PLUGIN_BASENAME, array( $this, 'add_settings_link' ) );
+        add_filter( 'plugin_action_links_' . FHC_PLUGIN_BASENAME, array( $this, 'add_settings_link' ) );
         
         // Enqueue admin scripts and styles.
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
@@ -77,7 +77,7 @@ class Settings {
         }
         
         // Get settings page access control settings
-        $access_settings = get_option('fcs_settings_access_control', array(
+        $access_settings = get_option('fhc_settings_access_control', array(
             'enable_whitelist' => false,
             'whitelist' => array()
         ));
@@ -117,7 +117,7 @@ class Settings {
             if (!$this->has_authorized_email()) {
                 // Redirect to admin dashboard with error message
                 wp_redirect(add_query_arg(
-                    'fcs-access-denied', 
+                    'fhc-access-denied', 
                     '1', 
                     admin_url('index.php')
                 ));
@@ -126,7 +126,7 @@ class Settings {
         }
         
         // Show admin notice for access denied
-        if (isset($_GET['fcs-access-denied']) && $_GET['fcs-access-denied'] === '1') {
+        if (isset($_GET['fhc-access-denied']) && $_GET['fhc-access-denied'] === '1') {
             add_action('admin_notices', function() {
                 echo '<div class="notice notice-error is-dismissible"><p>';
                 echo esc_html__('Access denied. You do not have permission to access the Focal Core Settings.', 'focal-core-settings');
@@ -197,26 +197,26 @@ class Settings {
         
         // Enqueue admin styles.
         wp_enqueue_style(
-            'fcs-admin-styles',
-            FCS_PLUGIN_URL . 'assets/css/admin.css',
+            'fhc-admin-styles',
+            FHC_PLUGIN_URL . 'assets/css/admin.css',
             array(),
-            FCS_VERSION,
+            FHC_VERSION,
             'all'
         );
         
         // Enqueue admin scripts.
         wp_enqueue_script(
-            'fcs-admin-scripts',
-            FCS_PLUGIN_URL . 'assets/js/admin.js',
+            'fhc-admin-scripts',
+            FHC_PLUGIN_URL . 'assets/js/admin.js',
             array( 'jquery' ),
-            FCS_VERSION,
+            FHC_VERSION,
             true
         );
         
         // Localize the script with translation strings.
         wp_localize_script(
-            'fcs-admin-scripts',
-            'fcsL10n',
+            'fhc-admin-scripts',
+            'fhcL10n',
             array(
                 'saving'     => esc_html__( 'Saving...', 'focal-core-settings' ),
                 'saved'      => esc_html__( 'Settings saved.', 'focal-core-settings' ),
@@ -304,8 +304,8 @@ class Settings {
         // Add admin notice if settings were just saved
         if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] ) {
             add_settings_error(
-                'fcs_messages',
-                'fcs_message',
+                'fhc_messages',
+                'fhc_message',
                 __( 'Settings saved.', 'focal-core-settings' ),
                 'updated'
             );
@@ -324,14 +324,14 @@ class Settings {
         global $wp_post_types; // Needed for checking post types during save
 
         // Check if the form has been submitted
-         if ( isset( $_POST['submit'] ) && isset( $_POST['fcs_permalink_nonce'] ) ) {
+         if ( isset( $_POST['submit'] ) && isset( $_POST['fhc_permalink_nonce'] ) ) {
              // Verify nonce
-             if ( check_admin_referer( 'fcs_save_permalink_settings', 'fcs_permalink_nonce' ) ) {
+             if ( check_admin_referer( 'fhc_save_permalink_settings', 'fhc_permalink_nonce' ) ) {
 
                  // Sanitize and prepare data for saving
                  $sanitized_input = array();
-                 $selected = isset( $_POST['fcs_cpt_without_base']['selected'] ) && is_array( $_POST['fcs_cpt_without_base']['selected'] ) ? $_POST['fcs_cpt_without_base']['selected'] : array();
-                 $alternation = isset( $_POST['fcs_cpt_without_base']['alternation'] ) && is_array( $_POST['fcs_cpt_without_base']['alternation'] ) ? $_POST['fcs_cpt_without_base']['alternation'] : array();
+                 $selected = isset( $_POST['fhc_cpt_without_base']['selected'] ) && is_array( $_POST['fhc_cpt_without_base']['selected'] ) ? $_POST['fhc_cpt_without_base']['selected'] : array();
+                 $alternation = isset( $_POST['fhc_cpt_without_base']['alternation'] ) && is_array( $_POST['fhc_cpt_without_base']['alternation'] ) ? $_POST['fhc_cpt_without_base']['alternation'] : array();
 
                  foreach ( $selected as $post_type => $value ) {
                      // Check if the post type actually exists before saving
@@ -343,26 +343,26 @@ class Settings {
                  }
 
                  // Get current saved options to compare
-                 $current_options = get_option('fcs_cpt_without_base', array());
+                 $current_options = get_option('fhc_cpt_without_base', array());
 
                  // Update the option in the database
-                 update_option( 'fcs_cpt_without_base', $sanitized_input );
+                 update_option( 'fhc_cpt_without_base', $sanitized_input );
 
                  // Flush rewrite rules only if the settings have actually changed
                  if ($current_options !== $sanitized_input) {
                      flush_rewrite_rules();
                      // Add admin notice for successful save and flush reminder
                      add_settings_error(
-                         'fcs_messages',
-                         'fcs_message',
+                         'fhc_messages',
+                         'fhc_message',
                          __( 'Settings saved. Permalink structure has been updated. IMPORTANT: If issues persist, please visit the <a href="options-permalink.php">Permalinks Settings</a> page and click "Save Changes" again.', 'focal-core-settings' ),
                          'updated'
                      );
                  } else {
                       // Add admin notice for successful save (no changes)
                      add_settings_error(
-                         'fcs_messages',
-                         'fcs_message',
+                         'fhc_messages',
+                         'fhc_message',
                          __( 'Settings saved.', 'focal-core-settings' ),
                          'updated'
                      );
@@ -376,8 +376,8 @@ class Settings {
              } else {
                  // Nonce verification failed
                  add_settings_error(
-                     'fcs_messages',
-                     'fcs_message',
+                     'fhc_messages',
+                     'fhc_message',
                      __( 'Nonce verification failed. Settings not saved.', 'focal-core-settings' ),
                      'error'
                  );
@@ -385,11 +385,14 @@ class Settings {
          }
 
          // Display settings errors/notices
-         settings_errors( 'fcs_messages' );
+         settings_errors( 'fhc_messages' );
 
          // Get the permalinks module instance and render its tab content
          // The render_tab_content method will now fetch the latest options when displaying the form
          $permalinks = Permalinks::get_instance();
+         // We need to ensure the instance reloads its internal options if we want immediate reflection
+         // A simple way is to add a public reload method to Permalinks class, or just call load_cpt_without_base again if it's public.
+         // Let's assume render_tab_content fetches fresh options via get_option() internally.
          $permalinks->render_tab_content();
     }
     
@@ -399,7 +402,7 @@ class Settings {
      */
     public function render_misc_settings_tab() {
         // Get the misc module instance and render its tab content
-        $misc = \FocalCore\Misc\Misc::get_instance();
+        $misc = \FocalHaus\Misc\Misc::get_instance();
         $misc->render_tab_content();
     }
     
@@ -409,7 +412,7 @@ class Settings {
      */
     public function render_gtm_settings_tab() {
         // Get the GTM module instance and render its tab content
-        $gtm = \FocalCore\GTM\GTM::get_instance();
+        $gtm = \FocalHaus\GTM\GTM::get_instance();
         $gtm->render_tab_content();
     }
     
@@ -419,20 +422,20 @@ class Settings {
      */
     public function render_access_control_tab() {
         // Process form submission
-        if (isset($_POST['fcs_access_control_submit']) && isset($_POST['fcs_access_control_nonce'])) {
+        if (isset($_POST['fhc_access_control_submit']) && isset($_POST['fhc_access_control_nonce'])) {
             // Verify nonce
-            if (check_admin_referer('fcs_save_access_control_settings', 'fcs_access_control_nonce')) {
+            if (check_admin_referer('fhc_save_access_control_settings', 'fhc_access_control_nonce')) {
                 // Get current settings
-                $current_settings = get_option('fcs_settings_access_control', array(
+                $current_settings = get_option('fhc_settings_access_control', array(
                     'enable_whitelist' => false,
                     'whitelist' => array()
                 ));
                 
                 // Get and sanitize form data
-                $enable_whitelist = isset($_POST['fcs_enable_settings_access_whitelist']) ? true : false;
+                $enable_whitelist = isset($_POST['fhc_enable_settings_access_whitelist']) ? true : false;
                 
                 // Process whitelist emails
-                $whitelist_emails = isset($_POST['fcs_settings_access_whitelist']) ? sanitize_textarea_field($_POST['fcs_settings_access_whitelist']) : '';
+                $whitelist_emails = isset($_POST['fhc_settings_access_whitelist']) ? sanitize_textarea_field($_POST['fhc_settings_access_whitelist']) : '';
                 $whitelist_array = array();
                 
                 if (!empty($whitelist_emails)) {
@@ -458,8 +461,8 @@ class Settings {
                         
                         // Add notice that user's email was added
                         add_settings_error(
-                            'fcs_access_control_messages',
-                            'fcs_access_control_email_added',
+                            'fhc_access_control_messages',
+                            'fhc_access_control_email_added',
                             sprintf(__('Your email address (%s) was automatically added to the whitelist to prevent lockout.', 'focal-core-settings'), $current_user_email),
                             'info'
                         );
@@ -472,20 +475,20 @@ class Settings {
                     'whitelist' => $whitelist_array
                 );
                 
-                update_option('fcs_settings_access_control', $new_settings);
+                update_option('fhc_settings_access_control', $new_settings);
                 
                 // Add success message
                 add_settings_error(
-                    'fcs_access_control_messages',
-                    'fcs_access_control_message',
+                    'fhc_access_control_messages',
+                    'fhc_access_control_message',
                     __('Access control settings saved successfully.', 'focal-core-settings'),
                     'updated'
                 );
             } else {
                 // Nonce verification failed
                 add_settings_error(
-                    'fcs_access_control_messages',
-                    'fcs_access_control_message',
+                    'fhc_access_control_messages',
+                    'fhc_access_control_message',
                     __('Security check failed. Settings not saved.', 'focal-core-settings'),
                     'error'
                 );
@@ -493,10 +496,10 @@ class Settings {
         }
         
         // Display settings errors/notices
-        settings_errors('fcs_access_control_messages');
+        settings_errors('fhc_access_control_messages');
         
         // Get current settings
-        $settings = get_option('fcs_settings_access_control', array(
+        $settings = get_option('fhc_settings_access_control', array(
             'enable_whitelist' => false,
             'whitelist' => array()
         ));
@@ -505,9 +508,9 @@ class Settings {
         $whitelist_emails = !empty($settings['whitelist']) ? implode("\n", $settings['whitelist']) : '';
         
         ?>
-        <div class="fcs-access-control-settings">
+        <div class="fhc-access-control-settings">
             <form method="post" action="">
-                <?php wp_nonce_field('fcs_save_access_control_settings', 'fcs_access_control_nonce'); ?>
+                <?php wp_nonce_field('fhc_save_access_control_settings', 'fhc_access_control_nonce'); ?>
                 
                 <h2><?php esc_html_e('Plugin Settings Access Control', 'focal-core-settings'); ?></h2>
                 <p class="description">
@@ -524,13 +527,13 @@ class Settings {
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="fcs_enable_settings_access_whitelist">
+                            <label for="fhc_enable_settings_access_whitelist">
                                 <?php esc_html_e('Enable Settings Access Whitelist', 'focal-core-settings'); ?>
                             </label>
                         </th>
                         <td>
                             <label>
-                                <input type="checkbox" name="fcs_enable_settings_access_whitelist" id="fcs_enable_settings_access_whitelist" 
+                                <input type="checkbox" name="fhc_enable_settings_access_whitelist" id="fhc_enable_settings_access_whitelist" 
                                     <?php checked($settings['enable_whitelist'], true); ?>>
                                 <?php esc_html_e('Enable settings page access whitelist', 'focal-core-settings'); ?>
                             </label>
@@ -544,12 +547,12 @@ class Settings {
                     
                     <tr>
                         <th scope="row">
-                            <label for="fcs_settings_access_whitelist">
+                            <label for="fhc_settings_access_whitelist">
                                 <?php esc_html_e('Settings Access Whitelist', 'focal-core-settings'); ?>
                             </label>
                         </th>
                         <td>
-                            <textarea name="fcs_settings_access_whitelist" id="fcs_settings_access_whitelist" rows="8" cols="50" class="large-text code"><?php echo esc_textarea($whitelist_emails); ?></textarea>
+                            <textarea name="fhc_settings_access_whitelist" id="fhc_settings_access_whitelist" rows="8" cols="50" class="large-text code"><?php echo esc_textarea($whitelist_emails); ?></textarea>
                             <p class="description">
                                 <?php esc_html_e('Enter one email address per line or separated by commas.', 'focal-core-settings'); ?>
                                 <br>
@@ -560,7 +563,7 @@ class Settings {
                 </table>
                 
                 <p>
-                    <input type="submit" name="fcs_access_control_submit" class="button button-primary" value="<?php esc_attr_e('Save Settings', 'focal-core-settings'); ?>">
+                    <input type="submit" name="fhc_access_control_submit" class="button button-primary" value="<?php esc_attr_e('Save Settings', 'focal-core-settings'); ?>">
                 </p>
             </form>
         </div>

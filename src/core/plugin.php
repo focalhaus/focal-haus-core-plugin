@@ -6,13 +6,13 @@
  * @subpackage Core
  */
 
-namespace FocalCore\core;
+namespace FocalHaus\core;
 
-use FocalCore\admin\Settings;
-use FocalCore\MenuHiding\MenuHiding;
-use FocalCore\Permalinks\Permalinks;
-use FocalCore\misc\Misc;
-use FocalCore\GTM\GTM;
+use FocalHaus\admin\Settings;
+use FocalHaus\MenuHiding\MenuHiding;
+use FocalHaus\Permalinks\Permalinks;
+use FocalHaus\misc\Misc;
+use FocalHaus\GTM\GTM;
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,7 +67,7 @@ class Plugin {
         load_plugin_textdomain(
             'focal-core-settings',
             false,
-            dirname( FCS_PLUGIN_BASENAME ) . '/languages/'
+            dirname( FHC_PLUGIN_BASENAME ) . '/languages/'
         );
     }
     

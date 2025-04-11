@@ -1,4 +1,4 @@
-=== Focal Core Settings ===
+=== Focal Haus Core Plugin ===
 Contributors: focalhausdev
 Tags: admin, dashboard, menu, hide, security, roles, core, multilingual, google tag manager, gtm
 Requires at least: 5.0
@@ -11,7 +11,7 @@ A comprehensive plugin that provides multiple functionalities for WordPress site
 
 == Description ==
 
-The Focal Core Settings plugin is a powerful toolkit that provides multiple essential functionalities for WordPress sites. This plugin is designed to enhance your WordPress experience with a collection of useful features, all accessible through a clean, tabbed interface.
+The Focal Haus Core Plugin is a powerful toolkit that provides multiple essential functionalities for WordPress sites. This plugin is designed to enhance your WordPress experience with a collection of useful features, all accessible through a clean, tabbed interface.
 
 = Current Features =
 
@@ -79,9 +79,9 @@ This plugin follows WordPress security best practices:
 
 == Installation ==
 
-1. Upload the `focal-core-settings` folder to the `/wp-content/plugins/` directory
+1. Upload the `focal-haus-core-plugin` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to Settings > Focal Core Settings to configure the plugin's features
+3. Go to Settings > Focal Haus Core to configure the plugin's features
 
 == Frequently Asked Questions ==
 
@@ -91,7 +91,7 @@ Currently, the multilingual features are designed to work with Polylang. Support
 
 = Will the Hide Menu Items feature hide menu items for administrators? =
 
-By default, administrators will see all menu items. However, with the admin whitelist feature, you can choose to hide menu items from all admin users except those whose email addresses you've added to the whitelist.
+By default, administrators will see all menu items. However, with the new admin whitelist feature, you can choose to hide menu items from all admin users except those whose email addresses you've added to the whitelist.
 
 = Will removing CPT base slugs cause conflicts with other plugins? =
 
@@ -138,9 +138,6 @@ The role-based tracking controls let you create the exact configuration that mak
 * Added Select All/None buttons to quickly manage role selections
 * Improved code preview to show detailed tracking conditions
 * Updated documentation to explain role-based tracking benefits
-* Renamed plugin from "Focal Haus Core Plugin" to "Focal Core Settings"
-* Updated internal references and namespaces for better organization
-* Added migration code to preserve existing settings when updating
 
 = 1.2.1 =
 * Enhanced Google Tag Manager with more granular user tracking controls
@@ -221,9 +218,6 @@ The role-based tracking controls let you create the exact configuration that mak
 
 == Upgrade Notice ==
 
-= 0.2.5 =
-Plugin renamed to "Focal Core Settings" with improved organization. Your existing settings will be automatically migrated.
-
 = 1.1.1 =
 This update fixes a critical issue with SEOPress XML sitemaps for CPTs with removed base slugs. If you're using SEOPress and experiencing 404 errors on your sitemaps, this update will resolve the issue.
 
@@ -231,4 +225,4 @@ This update fixes a critical issue with SEOPress XML sitemaps for CPTs with remo
 This update adds Custom Permalinks functionality and Plugin Integrations to ensure compatibility with popular plugins when using custom permalink structures.
 
 = 1.0.0 =
-Initial release of the Focal Core Settings Plugin with Hide Dashboard Menu Items functionality.
+Initial release of the Focal Haus Core Plugin with Hide Dashboard Menu Items functionality.

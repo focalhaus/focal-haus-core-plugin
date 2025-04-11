@@ -21,7 +21,7 @@ class MenuHiding {
     /**
      * Instance of this class.
      *
-     * @since 1.0.0
+     * @since 0.1.0
      * @var object
      */
     protected static $instance = null;
@@ -29,7 +29,6 @@ class MenuHiding {
     /**
      * Initialize the class.
      *
-     * @since 1.0.0
      */
     private function __construct() {
         // Register settings.
@@ -46,7 +45,6 @@ class MenuHiding {
     /**
      * Return an instance of this class.
      *
-     * @since 1.0.0
      * @return object A single instance of this class.
      */
     public static function get_instance() {
@@ -61,7 +59,6 @@ class MenuHiding {
     /**
      * Register plugin settings.
      *
-     * @since 1.0.0
      */
     public function register_settings() {
         // First, make sure the options exist to avoid initialization issues
@@ -101,7 +98,6 @@ class MenuHiding {
     /**
      * Sanitize hidden menu items.
      *
-     * @since 1.0.0
      * @param array|string $input The value being saved.
      * @return array Sanitized value.
      */
@@ -183,7 +179,6 @@ class MenuHiding {
     /**
      * Sanitize menu hiding settings.
      *
-     * @since 1.1.4
      * @param array|string $input The value being saved.
      * @return array Sanitized value.
      */
@@ -216,7 +211,6 @@ class MenuHiding {
     /**
      * Encode a menu slug for use as an option key.
      *
-     * @since 1.0.0
      * @param string $slug The menu slug to encode.
      * @return string The encoded slug.
      */
@@ -227,7 +221,6 @@ class MenuHiding {
     /**
      * Decode a menu slug from an option key.
      *
-     * @since 1.0.0
      * @param string $encoded_slug The encoded menu slug.
      * @return string The decoded slug.
      */
@@ -238,7 +231,6 @@ class MenuHiding {
     /**
      * Clean menu title by removing update counts and notification strings.
      *
-     * @since 1.0.0
      * @param string $title The menu title to clean.
      * @return string The cleaned menu title.
      */
@@ -258,7 +250,6 @@ class MenuHiding {
     /**
      * Get all admin menu and submenu items.
      *
-     * @since 1.0.0
      * @return array Admin menu and submenu items.
      */
     public function get_admin_menu_items() {
@@ -322,7 +313,6 @@ class MenuHiding {
     /**
      * Check if current user should be able to see hidden menu items.
      * 
-     * @since 1.1.4
      * @return bool True if user should see all items, false otherwise.
      */
     private function user_can_see_all_items() {
@@ -366,7 +356,6 @@ class MenuHiding {
     /**
      * Block access to hidden pages for non-authorized users.
      * 
-     * @since 1.0.0
      */
     public function block_hidden_page_access() {
         // Skip if user can see all items
@@ -455,7 +444,6 @@ class MenuHiding {
     /**
      * Hide menu and submenu items for non-admin users or non-whitelisted admin users.
      *
-     * @since 1.0.0
      */
     public function hide_menu_items() {
         // Skip if user can see all items
@@ -515,7 +503,6 @@ class MenuHiding {
     /**
      * Render the Hide Menu Items tab content.
      *
-     * @since 1.0.0
      */
     public function render_tab_content() {
         // Get saved settings.

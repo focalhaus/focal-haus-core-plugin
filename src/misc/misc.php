@@ -21,7 +21,7 @@ class Misc {
     /**
      * Instance of this class.
      *
-     * @since 1.1.3
+     * @since 0.2.0
      * @var object
      */
     protected static $instance = null;
@@ -29,7 +29,6 @@ class Misc {
     /**
      * Option name for storing settings.
      *
-     * @since 1.1.3
      * @var string
      */
     private $option_name = 'fhc_misc_settings';
@@ -37,7 +36,6 @@ class Misc {
     /**
      * Default settings.
      *
-     * @since 1.2.0
      * @var array
      */
     private $default_settings = array(
@@ -53,7 +51,6 @@ class Misc {
     /**
      * Initialize the class.
      *
-     * @since 1.1.3
      */
     private function __construct() {
         // Load settings
@@ -69,7 +66,6 @@ class Misc {
     /**
      * Return an instance of this class.
      *
-     * @since 1.1.3
      * @return object A single instance of this class.
      */
     public static function get_instance() {
@@ -84,7 +80,6 @@ class Misc {
     /**
      * Load settings from the database.
      *
-     * @since 1.1.3
      */
     private function load_settings() {
         $this->settings = get_option($this->option_name, $this->default_settings);
@@ -96,7 +91,6 @@ class Misc {
     /**
      * Initialize features based on settings.
      *
-     * @since 1.1.3
      */
     private function init_features() {
         // Initialize duplicate slugs feature if enabled
@@ -138,7 +132,6 @@ class Misc {
     /**
      * Enqueue scripts and styles for the admin area.
      *
-     * @since 1.2.0
      * @param string $hook The current admin page.
      */
     public function enqueue_admin_scripts($hook) {
@@ -163,7 +156,6 @@ class Misc {
     /**
      * Initialize the Polylang slug feature.
      *
-     * @since 1.1.3
      */
     private function init_polylang_slug_feature() {
         // Check if PLL exists & the minimum version is correct.
@@ -182,7 +174,6 @@ class Misc {
     /**
      * Render the tab content for the Misc settings.
      *
-     * @since 1.1.3
      */
     public function render_tab_content() {
         // Check if the form has been submitted
@@ -468,7 +459,6 @@ class Misc {
     /**
      * Minimum version admin notice.
      *
-     * @since 1.1.3
      */
     public function polylang_slug_admin_notices() {
         echo '<div class="error"><p>' . __( 'Focal Haus Core: Polylang Slug feature requires at the minimum Polylang v1.7 and WordPress 4.0', 'focal-haus-core') . '</p></div>';
@@ -476,8 +466,6 @@ class Misc {
 
     /**
      * Checks if the slug is unique within language.
-     *
-     * @since 1.1.3
      *
      * @global  wpdb  $wpdb        WordPress database abstraction object.
      *
@@ -539,8 +527,6 @@ class Misc {
     /**
      * Modify the sql query to include checks for the current language.
      *
-     * @since 1.1.3
-     *
      * @global wpdb   $wpdb  WordPress database abstraction object.
      *
      * @param  string $query Database query.
@@ -589,8 +575,6 @@ class Misc {
          *
          * Allows disabling front end query modification if not needed.
          *
-         * @since 1.1.3
-         *
          * @param string $sql_query    Database query.
          * @param array  $matches {
          *     @type string $matches[1] SELECT SQL Query.
@@ -608,8 +592,6 @@ class Misc {
      * Extend the WHERE clause of the query.
      *
      * This allows the query to return only the posts of the current language
-     *
-     * @since 1.1.3
      *
      * @param  string   $where The WHERE clause of the query.
      * @param  WP_Query $query The WP_Query instance (passed by reference).
@@ -635,8 +617,6 @@ class Misc {
      *
      * This allows the query to return only the posts of the current language
      *
-     * @since 1.1.3
-     *
      * @param  string   $join  The JOIN clause of the query.
      * @param  WP_Query $query The WP_Query instance (passed by reference).
      *
@@ -657,8 +637,6 @@ class Misc {
     /**
      * Check if the query needs to be adapted.
      *
-     * @since 1.1.3
-     *
      * @param  WP_Query $query The WP_Query instance (passed by reference).
      *
      * @return bool
@@ -668,8 +646,6 @@ class Misc {
          * Disable front end query modification.
          *
          * Allows disabling front end query modification if not needed.
-         *
-         * @since 1.1.3
          *
          * @param bool     false  Not disabling run.
          * @param WP_Query $query The WP_Query instance (passed by reference).
@@ -693,8 +669,6 @@ class Misc {
      *
      * This makes the standardized and simpler to run regex on
      *
-     * @since 1.1.3
-     *
      * @param  string $query Database query.
      *
      * @return string        The standardized query.
@@ -712,8 +686,6 @@ class Misc {
     /**
      * Fetch the polylang join clause.
      *
-     * @since 1.1.3
-     *
      * @return string
      */
     private function polylang_slug_model_post_join_clause() {
@@ -728,8 +700,6 @@ class Misc {
 
     /**
      * Fetch the polylang where clause.
-     *
-     * @since 1.1.3
      *
      * @param  string $lang The current language slug.
      *
@@ -748,7 +718,6 @@ class Misc {
     /**
      * Remove items from WordPress admin toolbar.
      *
-     * @since 1.2.0
      * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
      */
     public function remove_toolbar_nodes($wp_admin_bar) {
@@ -759,7 +728,6 @@ class Misc {
     /**
      * Grant full access to SEOPress features for editors.
      *
-     * @since 1.2.0
      * @param string $cap The capability being checked.
      * @param string $context The context of the check.
      * @return string The modified capability.
@@ -776,7 +744,6 @@ class Misc {
     /**
      * Add editor capabilities for SEOPress redirections.
      *
-     * @since 1.2.0
      */
     public function seopress_add_editor_caps_to_redirections() {
         $role = get_role('editor');
@@ -791,7 +758,6 @@ class Misc {
     /**
      * Customize the WordPress login page logo.
      *
-     * @since 1.2.0
      */
     public function custom_login_logo() {
         $logo_url = esc_url($this->settings['login_logo_url']);

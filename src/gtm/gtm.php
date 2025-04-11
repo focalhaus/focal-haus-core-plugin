@@ -21,7 +21,6 @@ class GTM {
     /**
      * Instance of this class.
      *
-     * @since 1.1.5
      * @var object
      */
     protected static $instance = null;
@@ -29,7 +28,6 @@ class GTM {
     /**
      * Initialize the class.
      *
-     * @since 1.1.5
      */
     private function __construct() {
         // Register settings.
@@ -45,7 +43,6 @@ class GTM {
     /**
      * Return an instance of this class.
      *
-     * @since 1.1.5
      * @return object A single instance of this class.
      */
     public static function get_instance() {
@@ -60,7 +57,6 @@ class GTM {
     /**
      * Register plugin settings.
      *
-     * @since 1.1.5
      */
     public function register_settings() {
         // First, make sure the options exist to avoid initialization issues
@@ -122,7 +118,6 @@ class GTM {
     /**
      * Sanitize GTM settings.
      *
-     * @since 1.1.5
      * @param array|string $input The value being saved.
      * @return array Sanitized value.
      */
@@ -173,7 +168,6 @@ class GTM {
     /**
      * Add Google Tag Manager script to header.
      *
-     * @since 1.1.5
      */
     public function add_gtm_head_script() {
         $gtm_settings = get_option( 'fhc_gtm_settings', array() );
@@ -204,7 +198,6 @@ class GTM {
     /**
      * Add Google Tag Manager noscript to body.
      *
-     * @since 1.1.5
      */
     public function add_gtm_body_script() {
         $gtm_settings = get_option( 'fhc_gtm_settings', array() );
@@ -312,7 +305,6 @@ class GTM {
     /**
      * Render the Google Tag Manager tab content.
      *
-     * @since 1.1.5
      */
     public function render_tab_content() {
         // Get saved settings.

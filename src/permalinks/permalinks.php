@@ -21,7 +21,6 @@ class Permalinks {
     /**
      * Instance of this class.
      *
-     * @since 1.1.2
      * @var object
      */
     protected static $instance = null;
@@ -30,7 +29,6 @@ class Permalinks {
      * Custom post types selected for base removal and their alternation status.
      * Format: [ 'cpt_name' => 0 (no alternation) or 1 (alternation) ]
      *
-     * @since 1.1.2
      * @var array
      */
     private $cpt_without_base = array();
@@ -38,7 +36,6 @@ class Permalinks {
     /**
      * Keys (post type names) of the selected CPTs.
      *
-     * @since 1.1.2
      * @var array
      */
     private $cpt_without_base_keys = array();
@@ -47,7 +44,6 @@ class Permalinks {
     /**
      * Initialize the class.
      *
-      * @since 1.0.0
       */
      private function __construct() {
          // Settings registration is now handled manually in Settings.php
@@ -72,7 +68,6 @@ class Permalinks {
     /**
      * Return an instance of this class.
      *
-     * @since 1.0.0
      * @return object A single instance of this class.
      */
     public static function get_instance() {
@@ -87,7 +82,6 @@ class Permalinks {
      /**
      * Load selected custom post types and their alternation status.
      *
-     * @since 1.1.2
      */
     private function load_cpt_without_base() {
         $this->cpt_without_base = get_option( 'fhc_cpt_without_base', array() );
@@ -98,7 +92,6 @@ class Permalinks {
      * Removes the CPT slug from the permalink.
      * Adapted from remove-cpt-base plugin.
      *
-     * @since 1.1.2
      * @param string $permalink Original permalink.
      * @param WP_Post $post Post object.
      * @param bool $leavename Whether to keep the post name.
@@ -121,7 +114,6 @@ class Permalinks {
      * Handles incoming requests to interpret base-less URLs.
      * Adapted from remove-cpt-base plugin.
      *
-     * @since 1.1.2
      * @param array $query_vars Original query variables.
      * @return array Modified query variables.
      */
@@ -294,8 +286,6 @@ class Permalinks {
     /**
      * Redirects old URLs (with base slug) to the new base-less URLs.
      * Adapted from remove-cpt-base plugin.
-     *
-     * @since 1.1.2
      */
     function handle_redirect(){
         global $post;
@@ -332,7 +322,6 @@ class Permalinks {
      * Helper function to get the current URL.
      * Adapted from remove-cpt-base plugin.
      *
-     * @since 1.1.2
      * @return string The current URL.
      */
     function get_current_url(){
@@ -353,8 +342,6 @@ class Permalinks {
     /**
      * Render the Permalink Settings tab content.
      * Adapted to include the 'alternation' option and manual save handling.
-     *
-     * @since 1.1.2
      */
     public function render_tab_content() {
         // Get saved settings for display

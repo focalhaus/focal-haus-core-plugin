@@ -1,10 +1,10 @@
-# Focal Haus Core Plugin
+# Focal Core Settings
 
 A comprehensive plugin that provides multiple functionalities for WordPress sites, including multilingual support and Google Tag Manager integration.
 
 ## Description
 
-The Focal Haus Core Plugin is a powerful toolkit that provides multiple essential functionalities for WordPress sites. This plugin is designed to enhance your WordPress experience with a collection of useful features, all accessible through a clean, tabbed interface.
+The Focal Core Settings plugin is a powerful toolkit that provides multiple essential functionalities for WordPress sites. This plugin is designed to enhance your WordPress experience with a collection of useful features, all accessible through a clean, tabbed interface.
 
 ### Current Features
 
@@ -66,9 +66,9 @@ This plugin follows WordPress security best practices:
 
 ## Installation
 
-1. Upload the `focal-haus-core` folder to the `/wp-content/plugins/` directory
+1. Upload the `focal-core-settings` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to Settings > Focal Haus Core to configure the plugin's features
+3. Go to Settings > Focal Core Settings to configure the plugin's features
 
 ## Frequently Asked Questions
 
@@ -78,7 +78,7 @@ Currently, the multilingual features are designed to work with Polylang. Support
 
 ### Will the Hide Menu Items feature hide menu items for administrators?
 
-By default, administrators will see all menu items. However, with the new admin whitelist feature, you can choose to hide menu items from all admin users except those whose email addresses you've added to the whitelist.
+By default, administrators will see all menu items. However, with the admin whitelist feature, you can choose to hide menu items from all admin users except those whose email addresses you've added to the whitelist.
 
 ### Will removing CPT base slugs cause conflicts with other plugins?
 

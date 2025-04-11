@@ -2,17 +2,17 @@
 /**
  * Main plugin class.
  *
- * @package Focal_Haus_Core
+ * @package Focal_Core_Settings
  * @subpackage Core
  */
 
-namespace FocalHaus\core;
+namespace FocalCore\core;
 
-use FocalHaus\admin\Settings;
-use FocalHaus\MenuHiding\MenuHiding;
-use FocalHaus\Permalinks\Permalinks;
-use FocalHaus\misc\Misc;
-use FocalHaus\GTM\GTM;
+use FocalCore\admin\Settings;
+use FocalCore\MenuHiding\MenuHiding;
+use FocalCore\Permalinks\Permalinks;
+use FocalCore\misc\Misc;
+use FocalCore\GTM\GTM;
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +29,6 @@ class Plugin {
     /**
      * Instance of this class.
      *
-     * @since 1.0.0
      * @var object
      */
     protected static $instance = null;
@@ -37,7 +36,6 @@ class Plugin {
     /**
      * Initialize the plugin.
      *
-     * @since 1.0.0
      */
     private function __construct() {
         // Load plugin text domain.
@@ -50,7 +48,6 @@ class Plugin {
     /**
      * Return an instance of this class.
      *
-     * @since 1.0.0
      * @return object A single instance of this class.
      */
     public static function get_instance() {
@@ -65,20 +62,18 @@ class Plugin {
     /**
      * Load the plugin text domain for translation.
      *
-     * @since 1.0.0
      */
     public function load_plugin_textdomain() {
         load_plugin_textdomain(
-            'focal-haus-core',
+            'focal-core-settings',
             false,
-            dirname( FHC_PLUGIN_BASENAME ) . '/languages/'
+            dirname( FCS_PLUGIN_BASENAME ) . '/languages/'
         );
     }
     
     /**
      * Initialize all modules.
      *
-     * @since 1.0.0
      */
     private function init_modules() {
         // Initialize admin settings

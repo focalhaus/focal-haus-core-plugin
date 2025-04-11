@@ -3,7 +3,7 @@ Contributors: focalhausdev
 Tags: admin, dashboard, menu, hide, security, roles, core, multilingual, google tag manager, gtm
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.2.2
+Stable tag: 0.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,7 +130,7 @@ The role-based tracking controls let you create the exact configuration that mak
 
 == Changelog ==
 
-= 1.2.2 =
+= 0.2.5 =
 * Completely redesigned Google Tag Manager role tracking system
 * Added comprehensive role-based exclusion with support for all WordPress roles
 * Automatically detects roles added by plugins like WooCommerce, LMS plugins, etc.

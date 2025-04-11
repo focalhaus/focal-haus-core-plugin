@@ -232,7 +232,7 @@ class GTM {
     /**
      * Get all available WordPress roles.
      * 
-     * @since 1.2.2
+     * @since 0.2.5
      * @return array Array of role slugs and display names.
      */
     private function get_available_roles() {
@@ -270,7 +270,7 @@ class GTM {
     /**
      * Check if current user should be tracked.
      * 
-     * @since 1.2.2
+     * @since 0.2.5
      * @return bool True if user should be tracked, false otherwise.
      */
     private function should_track_current_user() {

@@ -142,7 +142,7 @@
 }
 
 .fhc-submenu-item:before {
-    content: '└─';
+    content: '└';
     position: absolute;
     left: 12px;
     color: #999;

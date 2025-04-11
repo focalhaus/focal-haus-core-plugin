@@ -3,7 +3,7 @@ Contributors: focalhausdev
 Tags: admin, dashboard, menu, hide, security, roles, core, multilingual, google tag manager, gtm
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,9 +40,11 @@ The Focal Haus Core Plugin is a powerful toolkit that provides multiple essentia
 * Simple configuration with a clean user interface
 * Add your Google Tag Manager ID in one central location
 * Automatically insert GTM code in both header and body sections
-* Granular tracking controls for different user roles
+* Advanced role-based user tracking controls
 * Option to exclude all logged-in users from tracking
-* Option to track subscriber users while excluding higher-level users
+* Granular control to exclude specific user roles from tracking
+* Support for custom roles added by plugins like WooCommerce, LMS plugins, etc.
+* Intuitive grid interface for role selection with Select All/None buttons
 * Code preview showing exactly what will be added to your site
 * Proper implementation following Google's recommended practices
 * Works with any WordPress theme that supports the wp_head and wp_body_open hooks
@@ -111,9 +113,15 @@ The Google Tag Manager integration will work with any theme that properly implem
 
 Excluding logged-in users (like administrators and editors) from tracking is a common practice to avoid skewing your analytics data with internal traffic. The plugin gives you the option to enable or disable this feature based on your needs.
 
-= Why would I want to track subscribers but not other logged-in users? =
+= Why would I want to exclude specific user roles from tracking? =
 
-For membership sites, online courses, or subscription-based content, tracking subscribers' behavior is often critical for understanding user engagement and improving content. The "Track Subscribers Only" option lets you exclude staff and higher-level users (who might skew your analytics) while still gathering valuable data about your actual subscribers' behavior.
+Different user roles have different purposes on your site. For example:
+- You might want to exclude administrators and editors to prevent internal traffic from skewing your analytics
+- For membership sites, you might want to track subscribers while excluding staff
+- For e-commerce sites with WooCommerce, you might want to track customers but not shop managers
+- For LMS sites, you might want to track students but not instructors
+
+The role-based tracking controls let you create the exact configuration that makes sense for your site.
 
 == Screenshots ==
 
@@ -121,6 +129,15 @@ For membership sites, online courses, or subscription-based content, tracking su
 2. The Hide Menu Items tab where administrators can select which menu items to hide.
 
 == Changelog ==
+
+= 1.2.2 =
+* Completely redesigned Google Tag Manager role tracking system
+* Added comprehensive role-based exclusion with support for all WordPress roles
+* Automatically detects roles added by plugins like WooCommerce, LMS plugins, etc.
+* Added grid interface for selecting which roles to exclude from tracking
+* Added Select All/None buttons to quickly manage role selections
+* Improved code preview to show detailed tracking conditions
+* Updated documentation to explain role-based tracking benefits
 
 = 1.2.1 =
 * Enhanced Google Tag Manager with more granular user tracking controls

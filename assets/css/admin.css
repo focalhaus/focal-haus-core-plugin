@@ -264,6 +264,55 @@
     border-radius: 4px;
 }
 
+/* Role selection UI */
+.fhc-roles-container {
+    margin-top: 5px;
+}
+
+.fhc-roles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+    max-width: 800px;
+}
+
+@media (max-width: 1200px) {
+    .fhc-roles-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 782px) {
+    .fhc-roles-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fhc-role-item {
+    padding: 8px 12px;
+    background-color: #f8f8f8;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.fhc-role-item label {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+}
+
+.fhc-role-item input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.fhc-roles-actions {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
 .fhc-code-preview h3 {
     margin-top: 0;
     margin-bottom: 20px;

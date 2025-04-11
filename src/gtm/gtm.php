@@ -69,8 +69,33 @@ class GTM {
                 'enabled' => false,
                 'gtm_id' => '',
                 'exclude_logged_in' => true,
-                'track_subscribers' => false,
+                'excluded_roles' => array(),
             ) );
+        } else {
+            // Migrate old settings if needed (from track_subscribers to excluded_roles)
+            $current_settings = get_option( 'fhc_gtm_settings' );
+            if (!isset($current_settings['excluded_roles']) && isset($current_settings['track_subscribers'])) {
+                // If track_subscribers was enabled, we don't want to exclude subscribers
+                if ($current_settings['track_subscribers']) {
+                    $current_settings['excluded_roles'] = array(
+                        'administrator' => 1,
+                        'editor' => 1,
+                        'author' => 1,
+                        'contributor' => 1,
+                    );
+                } else {
+                    // If track_subscribers was disabled, we want to exclude all roles
+                    $current_settings['excluded_roles'] = array(
+                        'administrator' => 1,
+                        'editor' => 1,
+                        'author' => 1,
+                        'contributor' => 1,
+                        'subscriber' => 1,
+                    );
+                }
+                unset($current_settings['track_subscribers']);
+                update_option('fhc_gtm_settings', $current_settings);
+            }
         }
         
         register_setting(
@@ -82,7 +107,13 @@ class GTM {
                     'enabled' => false,
                     'gtm_id' => '',
                     'exclude_logged_in' => true,
-                    'track_subscribers' => false,
+                    'excluded_roles' => array(
+                        'administrator' => 1,
+                        'editor' => 1,
+                        'author' => 1,
+                        'contributor' => 1,
+                        'subscriber' => 1,
+                    ),
                 ),
             )
         );
@@ -126,8 +157,15 @@ class GTM {
         // Sanitize exclude_logged_in (boolean)
         $sanitized_input['exclude_logged_in'] = isset( $input['exclude_logged_in'] ) && $input['exclude_logged_in'] ? true : false;
         
-        // Sanitize track_subscribers (boolean)
-        $sanitized_input['track_subscribers'] = isset( $input['track_subscribers'] ) && $input['track_subscribers'] ? true : false;
+        // Sanitize excluded_roles (array)
+        $sanitized_input['excluded_roles'] = array();
+        if (isset($input['excluded_roles']) && is_array($input['excluded_roles'])) {
+            foreach ($input['excluded_roles'] as $role => $value) {
+                if ($value) {
+                    $sanitized_input['excluded_roles'][sanitize_key($role)] = 1;
+                }
+            }
+        }
         
         return $sanitized_input;
     }
@@ -143,19 +181,11 @@ class GTM {
         // Check if GTM is enabled and ID is set
         $enabled = isset( $gtm_settings['enabled'] ) ? $gtm_settings['enabled'] : false;
         $gtm_id = isset( $gtm_settings['gtm_id'] ) ? $gtm_settings['gtm_id'] : '';
-        $exclude_logged_in = isset( $gtm_settings['exclude_logged_in'] ) ? $gtm_settings['exclude_logged_in'] : true;
-        $track_subscribers = isset( $gtm_settings['track_subscribers'] ) ? $gtm_settings['track_subscribers'] : false;
         
         if ( $enabled && ! empty( $gtm_id ) ) {
-            // Check if we should exclude logged-in users
-            if ( $exclude_logged_in && is_user_logged_in() ) {
-                // If track_subscribers is enabled, check if the current user is a subscriber
-                if ( $track_subscribers && current_user_can( 'subscriber' ) && !current_user_can( 'edit_posts' ) ) {
-                    // Allow tracking for subscribers
-                } else {
-                    // Skip for other logged-in users
-                    return;
-                }
+            // Check if the current user should be tracked
+            if (!$this->should_track_current_user()) {
+                return; // Skip tracking for this user
             }
             
             // Output the GTM head script
@@ -182,19 +212,11 @@ class GTM {
         // Check if GTM is enabled and ID is set
         $enabled = isset( $gtm_settings['enabled'] ) ? $gtm_settings['enabled'] : false;
         $gtm_id = isset( $gtm_settings['gtm_id'] ) ? $gtm_settings['gtm_id'] : '';
-        $exclude_logged_in = isset( $gtm_settings['exclude_logged_in'] ) ? $gtm_settings['exclude_logged_in'] : true;
-        $track_subscribers = isset( $gtm_settings['track_subscribers'] ) ? $gtm_settings['track_subscribers'] : false;
         
         if ( $enabled && ! empty( $gtm_id ) ) {
-            // Check if we should exclude logged-in users
-            if ( $exclude_logged_in && is_user_logged_in() ) {
-                // If track_subscribers is enabled, check if the current user is a subscriber
-                if ( $track_subscribers && current_user_can( 'subscriber' ) && !current_user_can( 'edit_posts' ) ) {
-                    // Allow tracking for subscribers
-                } else {
-                    // Skip for other logged-in users
-                    return;
-                }
+            // Check if the current user should be tracked
+            if (!$this->should_track_current_user()) {
+                return; // Skip tracking for this user
             }
             
             // Output the GTM body script
@@ -208,6 +230,86 @@ class GTM {
     }
 
     /**
+     * Get all available WordPress roles.
+     * 
+     * @since 1.2.2
+     * @return array Array of role slugs and display names.
+     */
+    private function get_available_roles() {
+        global $wp_roles;
+        
+        if (!isset($wp_roles)) {
+            $wp_roles = new \WP_Roles();
+        }
+        
+        $all_roles = array();
+        foreach ($wp_roles->roles as $role_slug => $role_info) {
+            $all_roles[$role_slug] = translate_user_role($role_info['name']);
+        }
+        
+        // Sort roles alphabetically by display name
+        asort($all_roles);
+        
+        // Move administrator, editor, author, contributor, and subscriber to the top in that order
+        $ordered_roles = array();
+        $core_roles = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
+        
+        foreach ($core_roles as $core_role) {
+            if (isset($all_roles[$core_role])) {
+                $ordered_roles[$core_role] = $all_roles[$core_role];
+                unset($all_roles[$core_role]);
+            }
+        }
+        
+        // Add remaining roles
+        $ordered_roles = array_merge($ordered_roles, $all_roles);
+        
+        return $ordered_roles;
+    }
+
+    /**
+     * Check if current user should be tracked.
+     * 
+     * @since 1.2.2
+     * @return bool True if user should be tracked, false otherwise.
+     */
+    private function should_track_current_user() {
+        $gtm_settings = get_option('fhc_gtm_settings', array());
+        
+        // If not excluding logged-in users, track everyone
+        $exclude_logged_in = isset($gtm_settings['exclude_logged_in']) ? $gtm_settings['exclude_logged_in'] : true;
+        if (!$exclude_logged_in) {
+            return true;
+        }
+        
+        // If excluding logged-in but user is not logged in, track them
+        if (!is_user_logged_in()) {
+            return true;
+        }
+        
+        // At this point, user is logged in and we're excluding logged-in users
+        // But we need to check if their role is in the excluded list
+        
+        $excluded_roles = isset($gtm_settings['excluded_roles']) ? $gtm_settings['excluded_roles'] : array();
+        
+        // If no roles are excluded, don't track any logged-in users
+        if (empty($excluded_roles)) {
+            return false;
+        }
+        
+        // Check if any of the user's roles are excluded
+        $current_user = wp_get_current_user();
+        foreach ($current_user->roles as $role) {
+            if (isset($excluded_roles[$role]) && $excluded_roles[$role]) {
+                return false; // This role is excluded, don't track
+            }
+        }
+        
+        // If we get here, the user is logged in but none of their roles are excluded
+        return true;
+    }
+
+    /**
      * Render the Google Tag Manager tab content.
      *
      * @since 1.1.5
@@ -218,7 +320,17 @@ class GTM {
             'enabled' => false,
             'gtm_id' => '',
             'exclude_logged_in' => true,
+            'excluded_roles' => array(
+                'administrator' => 1,
+                'editor' => 1,
+                'author' => 1,
+                'contributor' => 1,
+                'subscriber' => 1,
+            ),
         ) );
+        
+        // Get all available roles
+        $all_roles = $this->get_available_roles();
         
         ?>
         <div class="fhc-tab-description">
@@ -294,23 +406,39 @@ class GTM {
                         </span>
                     </td>
                 </tr>
-                <tr class="fhc-track-subscribers-row" <?php echo (!isset($gtm_settings['exclude_logged_in']) || !$gtm_settings['exclude_logged_in']) ? 'style="display:none;"' : ''; ?>>
+                <tr class="fhc-exclude-roles-row" <?php echo (!isset($gtm_settings['exclude_logged_in']) || !$gtm_settings['exclude_logged_in']) ? 'style="display:none;"' : ''; ?>>
                     <th scope="row">
-                        <label for="fhc_gtm_track_subscribers">
-                            <?php esc_html_e( 'Track Subscribers Only', 'focal-haus-core' ); ?>
+                        <label>
+                            <?php esc_html_e( 'Exclude User Roles', 'focal-haus-core' ); ?>
                         </label>
                     </th>
                     <td>
-                        <input 
-                            type="checkbox" 
-                            id="fhc_gtm_track_subscribers" 
-                            name="fhc_gtm_settings[track_subscribers]" 
-                            value="1" 
-                            <?php checked( isset( $gtm_settings['track_subscribers'] ) && $gtm_settings['track_subscribers'] ); ?>
-                        >
-                        <span class="description">
-                            <?php esc_html_e( 'Enable this to still track subscriber-level users even when excluding other logged-in users.', 'focal-haus-core' ); ?>
-                        </span>
+                        <div class="fhc-roles-container">
+                            <p class="description">
+                                <?php esc_html_e( 'Select which user roles should be excluded from tracking. Users with any of these roles will not be tracked.', 'focal-haus-core' ); ?>
+                            </p>
+                            
+                            <div class="fhc-roles-grid">
+                                <?php foreach ( $all_roles as $role_slug => $role_name ) : ?>
+                                    <div class="fhc-role-item">
+                                        <label>
+                                            <input 
+                                                type="checkbox" 
+                                                name="fhc_gtm_settings[excluded_roles][<?php echo esc_attr( $role_slug ); ?>]" 
+                                                value="1" 
+                                                <?php checked( isset( $gtm_settings['excluded_roles'][$role_slug] ) && $gtm_settings['excluded_roles'][$role_slug] ); ?>
+                                            >
+                                            <span><?php echo esc_html( $role_name ); ?></span>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            
+                            <div class="fhc-roles-actions">
+                                <button type="button" class="button fhc-select-all-roles"><?php esc_html_e( 'Select All', 'focal-haus-core' ); ?></button>
+                                <button type="button" class="button fhc-select-none-roles"><?php esc_html_e( 'Select None', 'focal-haus-core' ); ?></button>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -325,17 +453,46 @@ class GTM {
                     <pre><?php
                     $gtm_id = isset( $gtm_settings['gtm_id'] ) && !empty( $gtm_settings['gtm_id'] ) ? $gtm_settings['gtm_id'] : 'GTM-XXXXXX';
                     $exclude_logged_in = isset( $gtm_settings['exclude_logged_in'] ) && $gtm_settings['exclude_logged_in'];
-                    $track_subscribers = isset( $gtm_settings['track_subscribers'] ) && $gtm_settings['track_subscribers'];
+                    $excluded_roles = isset( $gtm_settings['excluded_roles'] ) ? $gtm_settings['excluded_roles'] : array();
                     
                     if (!$exclude_logged_in) {
                         echo esc_html( '<?php /* All users are tracked */ ?>' . "\n" );
                         $condition = 'true';
-                    } elseif ($exclude_logged_in && !$track_subscribers) {
+                    } elseif ($exclude_logged_in && empty($excluded_roles)) {
                         echo esc_html( '<?php /* Only non-logged-in users are tracked */ ?>' . "\n" );
                         $condition = '! is_user_logged_in()';
                     } else {
-                        echo esc_html( '<?php /* Non-logged-in users and subscribers are tracked */ ?>' . "\n" );
-                        $condition = '! is_user_logged_in() || (current_user_can("subscriber") && !current_user_can("edit_posts"))';
+                        // Get the roles that are excluded
+                        $excluded_role_list = array();
+                        foreach ($excluded_roles as $role => $value) {
+                            if ($value) {
+                                $excluded_role_list[] = $role;
+                            }
+                        }
+                        
+                        if (count($excluded_role_list) === count($all_roles)) {
+                            // All roles are excluded
+                            echo esc_html( '<?php /* Only non-logged-in users are tracked */ ?>' . "\n" );
+                            $condition = '! is_user_logged_in()';
+                        } else {
+                            // Some roles are excluded
+                            $excluded_role_names = array();
+                            foreach ($excluded_role_list as $role) {
+                                if (isset($all_roles[$role])) {
+                                    $excluded_role_names[] = $all_roles[$role];
+                                }
+                            }
+                            
+                            echo esc_html( '<?php /* Non-logged-in users and users without the following roles are tracked: ' . implode(', ', $excluded_role_names) . ' */ ?>' . "\n" );
+                            
+                            // Build the role check condition
+                            $role_condition = array();
+                            foreach ($excluded_role_list as $role) {
+                                $role_condition[] = '!current_user_can("' . esc_js($role) . '")';
+                            }
+                            
+                            $condition = '! is_user_logged_in() || (is_user_logged_in() && ' . implode(' && ', $role_condition) . ')';
+                        }
                     }
                     
                     echo esc_html( '<?php if ( ' . $condition . ' ) : ?>' . "\n" );
@@ -356,12 +513,12 @@ class GTM {
                     if (!$exclude_logged_in) {
                         echo esc_html( '<?php /* All users are tracked */ ?>' . "\n" );
                         $condition = 'true';
-                    } elseif ($exclude_logged_in && !$track_subscribers) {
+                    } elseif ($exclude_logged_in && empty($excluded_roles)) {
                         echo esc_html( '<?php /* Only non-logged-in users are tracked */ ?>' . "\n" );
                         $condition = '! is_user_logged_in()';
                     } else {
-                        echo esc_html( '<?php /* Non-logged-in users and subscribers are tracked */ ?>' . "\n" );
-                        $condition = '! is_user_logged_in() || (current_user_can("subscriber") && !current_user_can("edit_posts"))';
+                        // We already calculated this above, just reuse the condition
+                        echo esc_html( '<?php /* Same tracking conditions as in header */ ?>' . "\n" );
                     }
                     
                     echo esc_html( '<?php if ( ' . $condition . ' ) : ?>' . "\n" );

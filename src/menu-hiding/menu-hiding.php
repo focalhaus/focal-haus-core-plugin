@@ -112,12 +112,35 @@ class MenuHiding {
         }
 
         $sanitized_input = array();
+        $parent_child_map = array();
         
-        // Loop through each input item
+        // First pass: collect data and create parent-child mapping
+        $menu_items = $this->get_admin_menu_items();
+        foreach ( $menu_items as $key => $item ) {
+            if ( $item['type'] === 'submenu' ) {
+                // Create a unique parent key by encoding the parent slug
+                $parent_key = $this->encode_menu_slug( $item['parent'] );
+                
+                // Store the relationship between parent and child
+                if ( !isset($parent_child_map[$parent_key]) ) {
+                    $parent_child_map[$parent_key] = array();
+                }
+                $parent_child_map[$parent_key][] = $key;
+            }
+        }
+        
+        // Second pass: process the input values
         foreach ( $input as $key => $value ) {
             if ( $value ) { // Only add if value is truthy
-                // We're using base64 encoded keys, so we don't need to sanitize them
+                // Add the current item
                 $sanitized_input[ $key ] = 1;
+                
+                // If this is a parent menu and it has children, add all its children too
+                if ( isset( $parent_child_map[$key] ) ) {
+                    foreach ( $parent_child_map[$key] as $child_key ) {
+                        $sanitized_input[ $child_key ] = 1;
+                    }
+                }
             }
         }
         

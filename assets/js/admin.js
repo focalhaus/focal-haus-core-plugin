@@ -131,8 +131,11 @@
                     const $allSubmenus = $menuGroup.find('.fhc-submenu-item input[type="checkbox"]');
                     const $checkedSubmenus = $allSubmenus.filter(':checked');
                     
+                    // If main checkbox is checked, check all submenu items
                     if ($mainCheckbox.prop('checked')) {
                         $menuGroup.addClass('fhc-checked');
+                        $menuGroup.addClass('fhc-has-checked-submenu');
+                        $allSubmenus.prop('checked', true);
                     }
                     
                     if ($checkedSubmenus.length > 0) {

@@ -45,12 +45,13 @@
 
 /* Menu groups */
 .fhc-menu-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     background-color: #fff;
     border: 1px solid #e5e5e5;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
     transition: all 0.2s ease;
+    max-width: 200px;
 }
 
 /* Checked states */
@@ -93,13 +94,16 @@
 .fhc-menu-section {
     margin: 0;
     padding: 10px 12px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #23282d;
     background-color: #f9f9f9;
     border-bottom: 1px solid #e5e5e5;
     border-radius: 3px 3px 0 0;
     transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .fhc-checked .fhc-menu-section {

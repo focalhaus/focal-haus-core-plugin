@@ -593,7 +593,7 @@ class MenuHiding {
                     
                     // Display menu sections in columns
                     $section_count = count( $menu_sections );
-                    $sections_per_column = ceil( $section_count / 3 ); // 3 columns
+                    $sections_per_column = ceil( $section_count / 5 ); // 5 columns
                     $section_index = 0;
                     ?>
                     

@@ -79,8 +79,10 @@
                     // Add/remove checked class to the menu group
                     if (isChecked) {
                         $menuGroup.addClass('fhc-checked');
+                        $menuGroup.addClass('fhc-has-checked-submenu');
                     } else {
                         $menuGroup.removeClass('fhc-checked');
+                        $menuGroup.removeClass('fhc-has-checked-submenu');
                     }
                     
                     // Update toggle all checkbox state

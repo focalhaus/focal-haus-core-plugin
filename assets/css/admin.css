@@ -137,7 +137,8 @@
     box-sizing: border-box;
 }
 
-.fhc-submenu-item:has(input[type="checkbox"]:checked) {
+.fhc-submenu-item:has(input[type="checkbox"]:checked),
+.fhc-checked .fhc-submenu-item {
     background-color: #f0f6fc;
 }
 
@@ -182,7 +183,8 @@
 }
 
 .fhc-menu-item:has(input[type="checkbox"]:checked):hover,
-.fhc-submenu-item:has(input[type="checkbox"]:checked):hover {
+.fhc-submenu-item:has(input[type="checkbox"]:checked):hover,
+.fhc-checked .fhc-submenu-item:hover {
     background-color: #e6f0fa;
 }
 

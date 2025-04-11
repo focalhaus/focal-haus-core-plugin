@@ -14,10 +14,29 @@
              * Initialize the admin functionality
              */
             init: function() {
+                // Force sync menu items on load
+                this.syncMenuCheckboxes();
+                
                 this.setupEventListeners();
                 this.setupFormSubmission();
                 this.initializeCheckedStates();
                 this.setupGTMSettings();
+            },
+            
+            /**
+             * Sync checkboxes - if parent is checked, check all children
+             */
+            syncMenuCheckboxes: function() {
+                $('.fhc-menu-group').each(function() {
+                    const $menuGroup = $(this);
+                    const $mainCheckbox = $menuGroup.find('.fhc-menu-item input[type="checkbox"]');
+                    const $subCheckboxes = $menuGroup.find('.fhc-submenu-item input[type="checkbox"]');
+                    
+                    // If main menu is checked, check all submenu items
+                    if ($mainCheckbox.is(':checked')) {
+                        $subCheckboxes.prop('checked', true);
+                    }
+                });
             },
             
             /**
@@ -125,27 +144,35 @@
              * Initialize the checked states based on current selections
              */
             initializeCheckedStates: function() {
+                // First pass - process main checkboxes and ensure submenu items are checked
                 $('.fhc-menu-group').each(function() {
                     const $menuGroup = $(this);
                     const $mainCheckbox = $menuGroup.find('.fhc-menu-item input[type="checkbox"]');
                     const $allSubmenus = $menuGroup.find('.fhc-submenu-item input[type="checkbox"]');
-                    const $checkedSubmenus = $allSubmenus.filter(':checked');
                     
-                    // If main checkbox is checked, check all submenu items
                     if ($mainCheckbox.prop('checked')) {
-                        $menuGroup.addClass('fhc-checked');
-                        $menuGroup.addClass('fhc-has-checked-submenu');
+                        $menuGroup.addClass('fhc-checked fhc-has-checked-submenu');
                         $allSubmenus.prop('checked', true);
                     }
+                });
+                
+                // Second pass - check submenu states and update parent as needed
+                $('.fhc-menu-group').each(function() {
+                    const $menuGroup = $(this);
+                    const $mainCheckbox = $menuGroup.find('.fhc-menu-item input[type="checkbox"]');
+                    const $allSubmenus = $menuGroup.find('.fhc-submenu-item input[type="checkbox"]');
                     
-                    if ($checkedSubmenus.length > 0) {
-                        $menuGroup.addClass('fhc-has-checked-submenu');
-                    }
-                    
-                    // If all submenus are checked, check the main menu checkbox
-                    if ($checkedSubmenus.length === $allSubmenus.length && $allSubmenus.length > 0) {
-                        $mainCheckbox.prop('checked', true);
-                        $menuGroup.addClass('fhc-checked');
+                    if (!$mainCheckbox.prop('checked')) {
+                        const $checkedSubmenus = $allSubmenus.filter(':checked');
+                        
+                        if ($checkedSubmenus.length > 0) {
+                            $menuGroup.addClass('fhc-has-checked-submenu');
+                            
+                            if ($checkedSubmenus.length === $allSubmenus.length && $allSubmenus.length > 0) {
+                                $mainCheckbox.prop('checked', true);
+                                $menuGroup.addClass('fhc-checked');
+                            }
+                        }
                     }
                 });
                 

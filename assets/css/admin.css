@@ -137,9 +137,10 @@
     box-sizing: border-box;
 }
 
+/* Style submenu items when they are checked or when their parent is checked */
 .fhc-submenu-item:has(input[type="checkbox"]:checked),
-.fhc-checked .fhc-submenu-item {
-    background-color: #f0f6fc;
+.fhc-menu-group.fhc-checked .fhc-submenu-item {
+    background-color: #f0f6fc !important;
 }
 
 .fhc-submenu-item:before {
@@ -182,10 +183,11 @@
     background-color: #f8f8f8;
 }
 
+/* Hover states for checked items */
 .fhc-menu-item:has(input[type="checkbox"]:checked):hover,
 .fhc-submenu-item:has(input[type="checkbox"]:checked):hover,
-.fhc-checked .fhc-submenu-item:hover {
-    background-color: #e6f0fa;
+.fhc-menu-group.fhc-checked .fhc-submenu-item:hover {
+    background-color: #e6f0fa !important;
 }
 
 /* Section info */

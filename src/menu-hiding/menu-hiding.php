@@ -112,33 +112,71 @@ class MenuHiding {
         }
 
         $sanitized_input = array();
-        $parent_child_map = array();
         
-        // First pass: collect data and create parent-child mapping
+        // Get all menu items to process
         $menu_items = $this->get_admin_menu_items();
+        
+        // Create a map of parent-child relationships and collect submenu items by parent
+        $parent_child_map = array();
+        $menu_hierarchy = array();
+        
         foreach ( $menu_items as $key => $item ) {
-            if ( $item['type'] === 'submenu' ) {
-                // Create a unique parent key by encoding the parent slug
-                $parent_key = $this->encode_menu_slug( $item['parent'] );
+            if ( $item['type'] === 'menu' ) {
+                $menu_hierarchy[$key] = array(
+                    'item' => $item,
+                    'submenu' => array()
+                );
+            } else if ( $item['type'] === 'submenu' ) {
+                $parent_slug = $item['parent'];
+                $parent_key = $this->encode_menu_slug( $parent_slug );
                 
-                // Store the relationship between parent and child
-                if ( !isset($parent_child_map[$parent_key]) ) {
+                if ( ! isset( $parent_child_map[$parent_key] ) ) {
                     $parent_child_map[$parent_key] = array();
                 }
+                
                 $parent_child_map[$parent_key][] = $key;
+                
+                if ( isset( $menu_hierarchy[$parent_key] ) ) {
+                    $menu_hierarchy[$parent_key]['submenu'][$key] = $item;
+                }
             }
         }
         
-        // Second pass: process the input values
+        // First, add all directly checked items
         foreach ( $input as $key => $value ) {
-            if ( $value ) { // Only add if value is truthy
-                // Add the current item
-                $sanitized_input[ $key ] = 1;
-                
-                // If this is a parent menu and it has children, add all its children too
+            if ( $value ) {
+                $sanitized_input[$key] = 1;
+            }
+        }
+        
+        // Then, ensure parent-child relationships are enforced
+        foreach ( $input as $key => $value ) {
+            if ( $value ) {
+                // If this is a parent menu item, ensure all its children are checked
                 if ( isset( $parent_child_map[$key] ) ) {
                     foreach ( $parent_child_map[$key] as $child_key ) {
-                        $sanitized_input[ $child_key ] = 1;
+                        $sanitized_input[$child_key] = 1;
+                    }
+                }
+                
+                // If this is a submenu item, find its parent
+                foreach ( $parent_child_map as $parent_key => $children ) {
+                    if ( in_array( $key, $children ) ) {
+                        // Check if all siblings are also checked
+                        $all_siblings_checked = true;
+                        foreach ( $children as $sibling_key ) {
+                            if ( $sibling_key !== $key && empty( $sanitized_input[$sibling_key] ) ) {
+                                $all_siblings_checked = false;
+                                break;
+                            }
+                        }
+                        
+                        // If all siblings are checked, check the parent too
+                        if ( $all_siblings_checked ) {
+                            $sanitized_input[$parent_key] = 1;
+                        }
+                        
+                        break;
                     }
                 }
             }

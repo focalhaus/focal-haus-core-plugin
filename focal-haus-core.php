@@ -66,6 +66,13 @@ function fhc_deactivate() {
     // Clear scheduled events
     wp_clear_scheduled_hook( 'fhc_flush_rewrite_rules' );
     
+    // Reset the access control whitelist settings to prevent admin lockout
+    $access_settings = get_option('fhc_settings_access_control', array());
+    if (isset($access_settings['enable_whitelist']) && $access_settings['enable_whitelist']) {
+        $access_settings['enable_whitelist'] = false;
+        update_option('fhc_settings_access_control', $access_settings);
+    }
+    
     // Flush rewrite rules on deactivation
     flush_rewrite_rules();
 }
@@ -81,6 +88,7 @@ function fhc_uninstall() {
     delete_option( 'fhc_cpt_without_base' );
     delete_option( 'fhc_misc_settings' );
     delete_option( 'fhc_gtm_settings' );
+    delete_option( 'fhc_settings_access_control' );
     
     // Flush rewrite rules on uninstall
     flush_rewrite_rules();

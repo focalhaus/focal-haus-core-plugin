@@ -32,15 +32,15 @@
 .fhc-columns {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 15px;
     margin-bottom: 20px;
     width: 100%;
 }
 
 .fhc-column {
-    flex: 1 1 calc(33.333% - 20px);
-    min-width: 250px;
-    max-width: calc(33.333% - 20px);
+    flex: 1 1 calc(20% - 15px);
+    min-width: 200px;
+    max-width: calc(20% - 15px);
 }
 
 /* Menu groups */
@@ -124,6 +124,8 @@
     position: relative;
     border-bottom: 1px solid #f5f5f5;
     transition: all 0.2s ease;
+    width: 200px;
+    box-sizing: border-box;
 }
 
 .fhc-submenu-item:has(input[type="checkbox"]:checked) {
@@ -212,10 +214,24 @@
 }
 
 /* Responsive adjustments */
+@media screen and (max-width: 1600px) {
+    .fhc-column {
+        flex: 1 1 calc(25% - 15px);
+        max-width: calc(25% - 15px);
+    }
+}
+
 @media screen and (max-width: 1200px) {
     .fhc-column {
-        flex: 1 1 calc(50% - 20px);
-        max-width: calc(50% - 20px);
+        flex: 1 1 calc(33.333% - 15px);
+        max-width: calc(33.333% - 15px);
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .fhc-column {
+        flex: 1 1 calc(50% - 15px);
+        max-width: calc(50% - 15px);
     }
 }
 

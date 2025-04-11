@@ -68,10 +68,10 @@ class Settings {
     }
     
     /**
-     * Check if user has authorized email domain.
+     * Check if user has authorized email access.
      * 
      * @since 1.1.9
-     * @return bool True if user has authorized email domain, false otherwise.
+     * @return bool True if user has authorized email, false otherwise.
      */
     private function has_authorized_email() {
         $current_user = wp_get_current_user();
@@ -80,22 +80,32 @@ class Settings {
             return false;
         }
         
-        $user_email = strtolower($current_user->user_email);
+        // Get settings page access control settings
+        $access_settings = get_option('fhc_settings_access_control', array(
+            'enable_whitelist' => false,
+            'whitelist' => array()
+        ));
         
-        // Check for the specific email
-        if ($user_email === 'membus@gmail.com') {
-            return true;
+        // If the settings page access whitelist is enabled, check against it
+        if (!empty($access_settings['enable_whitelist'])) {
+            if (!isset($access_settings['whitelist']) || !is_array($access_settings['whitelist']) || empty($access_settings['whitelist'])) {
+                return false;
+            }
+            
+            $user_email = strtolower($current_user->user_email);
+            
+            // Check if the user's email is in the whitelist
+            foreach ($access_settings['whitelist'] as $whitelisted_email) {
+                if ($user_email === strtolower(trim($whitelisted_email))) {
+                    return true;
+                }
+            }
+            
+            return false;
         }
         
-        // Check for the email domain
-        $email_parts = explode('@', $user_email);
-        if (count($email_parts) !== 2) {
-            return false; // Invalid email format
-        }
-        
-        $domain = $email_parts[1];
-        
-        return ($domain === 'focalhaus.com');
+        // If whitelist is not enabled, all admin users can access
+        return true;
     }
     
     /**
@@ -167,6 +177,10 @@ class Settings {
             'gtm_settings' => array(
                 'title' => __( 'Google Tag Manager', 'focal-haus-core' ),
                 'callback' => array( $this, 'render_gtm_settings_tab' ),
+            ),
+            'access_control' => array(
+                'title' => __( 'Access Control', 'focal-haus-core' ),
+                'callback' => array( $this, 'render_access_control_tab' ),
             ),
             // Additional tabs can be added here
         );
@@ -415,5 +429,160 @@ class Settings {
         // Get the GTM module instance and render its tab content
         $gtm = \FocalHaus\GTM\GTM::get_instance();
         $gtm->render_tab_content();
+    }
+    
+    /**
+     * Render the Access Control tab content.
+     *
+     * @since 1.2.3
+     */
+    public function render_access_control_tab() {
+        // Process form submission
+        if (isset($_POST['fhc_access_control_submit']) && isset($_POST['fhc_access_control_nonce'])) {
+            // Verify nonce
+            if (check_admin_referer('fhc_save_access_control_settings', 'fhc_access_control_nonce')) {
+                // Get current settings
+                $current_settings = get_option('fhc_settings_access_control', array(
+                    'enable_whitelist' => false,
+                    'whitelist' => array()
+                ));
+                
+                // Get and sanitize form data
+                $enable_whitelist = isset($_POST['fhc_enable_settings_access_whitelist']) ? true : false;
+                
+                // Process whitelist emails
+                $whitelist_emails = isset($_POST['fhc_settings_access_whitelist']) ? sanitize_textarea_field($_POST['fhc_settings_access_whitelist']) : '';
+                $whitelist_array = array();
+                
+                if (!empty($whitelist_emails)) {
+                    // Split by line breaks or commas
+                    $emails_raw = preg_split('/[\r\n,]+/', $whitelist_emails);
+                    
+                    foreach ($emails_raw as $email) {
+                        $email = trim($email);
+                        if (!empty($email) && is_email($email)) {
+                            $whitelist_array[] = sanitize_email($email);
+                        }
+                    }
+                }
+                
+                // FAIL-SAFE: If enabling the whitelist, ensure current user's email is included
+                if ($enable_whitelist) {
+                    $current_user = wp_get_current_user();
+                    $current_user_email = sanitize_email($current_user->user_email);
+                    
+                    // Add current user's email if not already in the whitelist
+                    if (!in_array($current_user_email, $whitelist_array)) {
+                        $whitelist_array[] = $current_user_email;
+                        
+                        // Add notice that user's email was added
+                        add_settings_error(
+                            'fhc_access_control_messages',
+                            'fhc_access_control_email_added',
+                            sprintf(__('Your email address (%s) was automatically added to the whitelist to prevent lockout.', 'focal-haus-core'), $current_user_email),
+                            'info'
+                        );
+                    }
+                }
+                
+                // Save settings
+                $new_settings = array(
+                    'enable_whitelist' => $enable_whitelist,
+                    'whitelist' => $whitelist_array
+                );
+                
+                update_option('fhc_settings_access_control', $new_settings);
+                
+                // Add success message
+                add_settings_error(
+                    'fhc_access_control_messages',
+                    'fhc_access_control_message',
+                    __('Access control settings saved successfully.', 'focal-haus-core'),
+                    'updated'
+                );
+            } else {
+                // Nonce verification failed
+                add_settings_error(
+                    'fhc_access_control_messages',
+                    'fhc_access_control_message',
+                    __('Security check failed. Settings not saved.', 'focal-haus-core'),
+                    'error'
+                );
+            }
+        }
+        
+        // Display settings errors/notices
+        settings_errors('fhc_access_control_messages');
+        
+        // Get current settings
+        $settings = get_option('fhc_settings_access_control', array(
+            'enable_whitelist' => false,
+            'whitelist' => array()
+        ));
+        
+        // Format whitelist emails for textarea
+        $whitelist_emails = !empty($settings['whitelist']) ? implode("\n", $settings['whitelist']) : '';
+        
+        ?>
+        <div class="fhc-access-control-settings">
+            <form method="post" action="">
+                <?php wp_nonce_field('fhc_save_access_control_settings', 'fhc_access_control_nonce'); ?>
+                
+                <h2><?php esc_html_e('Plugin Settings Access Control', 'focal-haus-core'); ?></h2>
+                <p class="description">
+                    <?php esc_html_e('Control which admin users can access the Focal Haus Core plugin settings page.', 'focal-haus-core'); ?>
+                </p>
+                
+                <div class="notice notice-info">
+                    <p>
+                        <?php esc_html_e('By default, all admin users can access the plugin settings page.', 'focal-haus-core'); ?>
+                        <?php esc_html_e('Enable the whitelist below to restrict access to only specific email addresses.', 'focal-haus-core'); ?>
+                    </p>
+                </div>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_enable_settings_access_whitelist">
+                                <?php esc_html_e('Enable Settings Access Whitelist', 'focal-haus-core'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="fhc_enable_settings_access_whitelist" id="fhc_enable_settings_access_whitelist" 
+                                    <?php checked($settings['enable_whitelist'], true); ?>>
+                                <?php esc_html_e('Enable settings page access whitelist', 'focal-haus-core'); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e('When enabled, only the specific email addresses listed below will have access to the plugin settings page.', 'focal-haus-core'); ?>
+                                <br>
+                                <?php esc_html_e('When disabled, all admin users can access the plugin settings page.', 'focal-haus-core'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="fhc_settings_access_whitelist">
+                                <?php esc_html_e('Settings Access Whitelist', 'focal-haus-core'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <textarea name="fhc_settings_access_whitelist" id="fhc_settings_access_whitelist" rows="8" cols="50" class="large-text code"><?php echo esc_textarea($whitelist_emails); ?></textarea>
+                            <p class="description">
+                                <?php esc_html_e('Enter one email address per line or separated by commas.', 'focal-haus-core'); ?>
+                                <br>
+                                <?php esc_html_e('Only these email addresses will be able to access the plugin settings page when the whitelist is enabled.', 'focal-haus-core'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <p>
+                    <input type="submit" name="fhc_access_control_submit" class="button button-primary" value="<?php esc_attr_e('Save Settings', 'focal-haus-core'); ?>">
+                </p>
+            </form>
+        </div>
+        <?php
     }
 }
